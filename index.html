@@ -1,0 +1,4780 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node.js Backend Roadmap — by Walid Ebaid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #030712;
+      --bg2: #0d1117;
+      --bg3: #161b22;
+      --bg4: #21262d;
+      --green: #00ff88;
+      --green2: #00cc6a;
+      --cyan: #00d4ff;
+      --purple: #a855f7;
+      --orange: #f97316;
+      --yellow: #fbbf24;
+      --red: #ef4444;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #484f58;
+      --border: #30363d;
+      --border2: #21262d;
+      --glow-green: 0 0 20px rgba(0, 255, 136, 0.4);
+      --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.4);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cairo', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* GRID BG */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--green);
+      border-radius: 2px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--green);
+      text-shadow: var(--glow-green);
+      letter-spacing: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--green);
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: var(--green);
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+      animation: fadeInDown 0.8s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s 0.2s ease both;
+    }
+
+    .hero h1 .line1 {
+      color: var(--text);
+      display: block;
+    }
+
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      max-width: 600px;
+      color: var(--text2);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s 0.4s ease both;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s 0.6s ease both;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: var(--glow-green);
+      display: block;
+    }
+
+    .stat-label {
+      color: var(--text2);
+      font-size: 0.85rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s 0.8s ease both;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: var(--bg);
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.3s;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* TECH ICONS ROW */
+    .tech-row {
+      margin-top: 4rem;
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s 1s ease both;
+    }
+
+    .tech-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text2);
+      transition: all 0.3s;
+    }
+
+    .tech-badge:hover {
+      border-color: var(--green);
+      color: var(--green);
+      transform: translateY(-2px);
+    }
+
+    /* SECTION */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text2);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    /* LEVELS OVERVIEW */
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 5rem;
+    }
+
+    .level-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .level-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: 16px;
+    }
+
+    .level-card.l0::before {
+      background: radial-gradient(circle at top right, rgba(168, 85, 247, 0.08), transparent 60%);
+    }
+
+    .level-card.l1::before {
+      background: radial-gradient(circle at top right, rgba(0, 255, 136, 0.08), transparent 60%);
+    }
+
+    .level-card.l2::before {
+      background: radial-gradient(circle at top right, rgba(0, 212, 255, 0.08), transparent 60%);
+    }
+
+    .level-card.l3::before {
+      background: radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 60%);
+    }
+
+    .level-card.l4::before {
+      background: radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), transparent 60%);
+    }
+
+    .level-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 255, 136, 0.3);
+    }
+
+    .level-card:hover::before {
+      opacity: 1;
+    }
+
+    .level-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      opacity: 0.15;
+      position: absolute;
+      top: 1rem;
+      left: 1.5rem;
+      line-height: 1;
+    }
+
+    .level-card.l0 .level-num {
+      color: var(--purple);
+    }
+
+    .level-card.l1 .level-num {
+      color: var(--green);
+    }
+
+    .level-card.l2 .level-num {
+      color: var(--cyan);
+    }
+
+    .level-card.l3 .level-num {
+      color: var(--orange);
+    }
+
+    .level-card.l4 .level-num {
+      color: var(--yellow);
+    }
+
+    .level-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .level-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .level-weeks {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .level-card.l0 .level-weeks {
+      color: var(--purple);
+    }
+
+    .level-card.l1 .level-weeks {
+      color: var(--green);
+    }
+
+    .level-card.l2 .level-weeks {
+      color: var(--cyan);
+    }
+
+    .level-card.l3 .level-weeks {
+      color: var(--orange);
+    }
+
+    .level-card.l4 .level-weeks {
+      color: var(--yellow);
+    }
+
+    .level-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 1rem;
+    }
+
+    .level-tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text2);
+    }
+
+    /* ROADMAP CONTENT */
+    .roadmap-level {
+      margin-bottom: 4rem;
+    }
+
+    .roadmap-level-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .level-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 2px solid;
+    }
+
+    .lvl-0 {
+      background: rgba(168, 85, 247, 0.1);
+      color: var(--purple);
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .lvl-1 {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green);
+      border-color: rgba(0, 255, 136, 0.3);
+    }
+
+    .lvl-2 {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+
+    .lvl-3 {
+      background: rgba(249, 115, 22, 0.1);
+      color: var(--orange);
+      border-color: rgba(249, 115, 22, 0.3);
+    }
+
+    .lvl-4 {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--yellow);
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .level-header-text h2 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .level-header-text p {
+      color: var(--text2);
+      font-size: 0.9rem;
+    }
+
+    /* OBJECTIVES */
+    .objectives-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .objectives-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .objectives-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text2);
+    }
+
+    .objectives-list li::before {
+      content: '▸';
+      color: var(--green);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .objectives-list li strong {
+      color: var(--text);
+    }
+
+    /* WEEKS */
+    .weeks-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .week-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .week-item:hover {
+      border-color: rgba(0, 255, 136, 0.2);
+    }
+
+    .week-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .week-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .week-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .week-toggle {
+      color: var(--text3);
+      transition: transform 0.3s;
+      font-size: 0.8rem;
+    }
+
+    .week-item.open .week-toggle {
+      transform: rotate(180deg);
+    }
+
+    .week-body {
+      display: none;
+      padding: 0 1.5rem 1.5rem;
+      border-top: 1px solid var(--border2);
+    }
+
+    .week-item.open .week-body {
+      display: block;
+    }
+
+    .week-section-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      margin: 1.2rem 0 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .ws-topics {
+      color: var(--cyan);
+    }
+
+    .ws-arabic {
+      color: var(--orange);
+    }
+
+    .ws-english {
+      color: var(--purple);
+    }
+
+    .ws-task {
+      color: var(--yellow);
+    }
+
+    .week-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .topics-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .topic-pill {
+      background: rgba(0, 212, 255, 0.06);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      color: var(--cyan);
+      padding: 0.25rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .resource-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .resource-list li a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.2s;
+      padding: 0.2rem 0;
+    }
+
+    .resource-list li a:hover {
+      color: var(--green);
+    }
+
+    .resource-list li a::before {
+      content: '▶';
+      font-size: 0.55rem;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .task-box {
+      background: rgba(251, 191, 36, 0.05);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .task-box p {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 0.5rem;
+    }
+
+    .task-box a {
+      color: var(--yellow);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .task-box a:hover {
+      text-decoration: underline;
+    }
+
+    /* PROJECTS SECTION */
+    #projects {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .project-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+    }
+
+    .project-card.p1::after {
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+    }
+
+    .project-card.p2::after {
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+    }
+
+    .project-card.p3::after {
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+    }
+
+    .project-card.p4::after {
+      background: linear-gradient(90deg, var(--purple), var(--red));
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 255, 136, 0.2);
+    }
+
+    .project-level-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .pb-l1 {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .pb-l2 {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .pb-l3 {
+      background: rgba(249, 115, 22, 0.1);
+      color: var(--orange);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .pb-l4 {
+      background: rgba(168, 85, 247, 0.1);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .project-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--text2);
+      margin-bottom: 1.2rem;
+      line-height: 1.7;
+    }
+
+    .project-criteria {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .project-criteria li {
+      font-size: 0.82rem;
+      color: var(--text2);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .project-criteria li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .project-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .stack-tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* JOBS / RECOMMENDATIONS */
+    #jobs {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .job-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .job-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+
+    .job-card.jb-1::before {
+      background: linear-gradient(90deg, var(--green), transparent);
+    }
+
+    .job-card.jb-2::before {
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+
+    .job-card.jb-3::before {
+      background: linear-gradient(90deg, var(--purple), transparent);
+    }
+
+    .job-card.jb-4::before {
+      background: linear-gradient(90deg, var(--orange), transparent);
+    }
+
+    .job-card.jb-5::before {
+      background: linear-gradient(90deg, var(--yellow), transparent);
+    }
+
+    .job-card.jb-6::before {
+      background: linear-gradient(90deg, var(--red), transparent);
+    }
+
+    .job-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 255, 136, 0.2);
+    }
+
+    .job-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .job-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .job-level {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--green);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .job-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 1.2rem;
+      line-height: 1.7;
+    }
+
+    .job-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .job-skill {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 0.7rem;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    .job-salary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 1rem;
+      background: var(--bg3);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .salary-label {
+      font-size: 0.75rem;
+      color: var(--text2);
+    }
+
+    .salary-range {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* TIMELINE */
+    .timeline {
+      position: relative;
+      padding-right: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--green), var(--cyan), var(--orange), var(--yellow));
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-right: 2.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      right: -8px;
+      top: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--bg);
+      flex-shrink: 0;
+    }
+
+    .td-0 {
+      background: var(--purple);
+    }
+
+    .td-1 {
+      background: var(--green);
+    }
+
+    .td-2 {
+      background: var(--cyan);
+    }
+
+    .td-3 {
+      background: var(--orange);
+    }
+
+    .td-4 {
+      background: var(--yellow);
+    }
+
+    .timeline-content {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .timeline-phase {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+
+    .tp-0 {
+      color: var(--purple);
+    }
+
+    .tp-1 {
+      color: var(--green);
+    }
+
+    .tp-2 {
+      color: var(--cyan);
+    }
+
+    .tp-3 {
+      color: var(--orange);
+    }
+
+    .tp-4 {
+      color: var(--yellow);
+    }
+
+    .timeline-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .timeline-duration {
+      display: inline-block;
+      margin-top: 0.8rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    /* TIPS */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .tip-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .tip-card:hover {
+      border-color: rgba(0, 255, 136, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .tip-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: rgba(0, 255, 136, 0.15);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .tip-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .tip-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      color: var(--green);
+      text-shadow: var(--glow-green);
+      margin-bottom: 1rem;
+    }
+
+    .footer-text {
+      color: var(--text2);
+      font-size: 0.85rem;
+    }
+
+    .footer-text a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* DIVIDER */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 2rem 0;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .hero-stats {
+        gap: 1.5rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .levels-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* CODE TERMINAL EFFECT */
+    .terminal {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 2rem 0;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .terminal-bar {
+      background: var(--bg3);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .t-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .t-dot:nth-child(1) {
+      background: #ef4444;
+    }
+
+    .t-dot:nth-child(2) {
+      background: #fbbf24;
+    }
+
+    .t-dot:nth-child(3) {
+      background: #22c55e;
+    }
+
+    .terminal-file {
+      font-size: 0.75rem;
+      color: var(--text2);
+      margin-right: auto;
+    }
+
+    .terminal-body {
+      padding: 1.2rem 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .t-prompt {
+      color: var(--green);
+    }
+
+    .t-cmd {
+      color: var(--text);
+    }
+
+    .t-comment {
+      color: var(--text3);
+    }
+
+    .t-string {
+      color: var(--orange);
+    }
+
+    .t-output {
+      color: var(--cyan);
+    }
+
+    /* HIGHLIGHT BOX */
+    .highlight-box {
+      background: rgba(0, 255, 136, 0.04);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-right: 3px solid var(--green);
+      border-radius: 8px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+      color: var(--text2);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid-bg"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">NODE.JS ROADMAP ▸ DEV</div>
+    <ul class="nav-links">
+      <li><a href="#overview">المستويات</a></li>
+      <li><a href="#roadmap">الخطة</a></li>
+      <li><a href="#projects">المشاريع</a></li>
+      <li><a href="#jobs">فرص العمل</a></li>
+      <li><a href="#tips">نصائح</a></li>
+      <li><a href="#quiz" style="color:var(--green); font-weight:700;">🎮 Quiz</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="hero-badge">WALID EBAID × NODE.JS ROADMAP</div>
+
+    <h1>
+      <span class="line1">خارطة طريق</span>
+      <span class="line2">Node.js Backend</span>
+    </h1>
+
+    <p class="hero-desc">
+      رحلة منظمة من الصفر للاحتراف في تطوير الـ Backend باستخدام Node.js — موارد، مشاريع، وكل اللي محتاجه عشان تبقى
+      Backend Developer محترف
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">4</span>
+        <span class="stat-label">مستويات</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">40+</span>
+        <span class="stat-label">أسبوع</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">6</span>
+        <span class="stat-label">مشاريع</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">100+</span>
+        <span class="stat-label">مورد</span>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#roadmap" class="btn-primary">ابدأ الرحلة 🚀</a>
+      <a href="#overview" class="btn-secondary">نظرة عامة</a>
+    </div>
+
+    <div class="tech-row">
+      <div class="tech-badge">⬡ Node.js</div>
+      <div class="tech-badge">⚡ Express</div>
+      <div class="tech-badge">🍃 MongoDB</div>
+      <div class="tech-badge">🔷 TypeScript</div>
+      <div class="tech-badge">🐘 PostgreSQL</div>
+      <div class="tech-badge">⚡ Redis</div>
+      <div class="tech-badge">🔌 Socket.io</div>
+      <div class="tech-badge">📐 GraphQL</div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="section-header">
+      <span class="section-tag">// OVERVIEW</span>
+      <h2 class="section-title">المستويات الأربعة</h2>
+      <p class="section-desc">من أساسيات الويب وحتى Microservices والـ System Design — رحلة كاملة</p>
+    </div>
+
+    <div class="levels-grid">
+      <a href="#level-0" class="level-card l0">
+        <div class="level-num">00</div>
+        <div class="level-icon">🌐</div>
+        <div class="level-title">Level 0 — التأسيس</div>
+        <div class="level-weeks">3 أسابيع</div>
+        <p style="font-size:0.85rem; color:var(--text2);">الإنترنت، HTML/CSS، Git، قواعد البيانات، الشبكات</p>
+        <div class="level-tags">
+          <span class="level-tag">HTML</span>
+          <span class="level-tag">CSS</span>
+          <span class="level-tag">Git</span>
+          <span class="level-tag">DNS</span>
+          <span class="level-tag">Networks</span>
+        </div>
+      </a>
+
+      <a href="#level-1" class="level-card l1">
+        <div class="level-num">01</div>
+        <div class="level-icon">⚡</div>
+        <div class="level-title">Level 1 — البداية</div>
+        <div class="level-weeks">8 أسابيع + مشروع</div>
+        <p style="font-size:0.85rem; color:var(--text2);">JavaScript كامل، Node.js، Express، MongoDB</p>
+        <div class="level-tags">
+          <span class="level-tag">JavaScript</span>
+          <span class="level-tag">Node.js</span>
+          <span class="level-tag">Express</span>
+          <span class="level-tag">MongoDB</span>
+        </div>
+      </a>
+
+      <a href="#level-2" class="level-card l2">
+        <div class="level-num">02</div>
+        <div class="level-icon">🔷</div>
+        <div class="level-title">Level 2 — الاحتراف</div>
+        <div class="level-weeks">11 أسبوع + مشروع</div>
+        <p style="font-size:0.85rem; color:var(--text2);">TypeScript، MVC، Auth، JWT، REST API، Testing</p>
+        <div class="level-tags">
+          <span class="level-tag">TypeScript</span>
+          <span class="level-tag">JWT</span>
+          <span class="level-tag">OAuth</span>
+          <span class="level-tag">Testing</span>
+        </div>
+      </a>
+
+      <a href="#level-3" class="level-card l3">
+        <div class="level-num">03</div>
+        <div class="level-icon">🔥</div>
+        <div class="level-title">Level 3 — المتقدم</div>
+        <div class="level-weeks">9 أسابيع + مشروع</div>
+        <p style="font-size:0.85rem; color:var(--text2);">SQL، GraphQL، Socket.io، Redis، Payments</p>
+        <div class="level-tags">
+          <span class="level-tag">SQL</span>
+          <span class="level-tag">GraphQL</span>
+          <span class="level-tag">Socket.io</span>
+          <span class="level-tag">Redis</span>
+        </div>
+      </a>
+
+      <a href="#level-4" class="level-card l4">
+        <div class="level-num">04</div>
+        <div class="level-icon">🏆</div>
+        <div class="level-title">Level 4 — الخبرة</div>
+        <div class="level-weeks">4+ أسابيع</div>
+        <p style="font-size:0.85rem; color:var(--text2);">Design Patterns، Microservices، DevOps، System Design</p>
+        <div class="level-tags">
+          <span class="level-tag">Design Patterns</span>
+          <span class="level-tag">Microservices</span>
+          <span class="level-tag">Docker</span>
+          <span class="level-tag">DevOps</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ROADMAP CONTENT -->
+  <section id="roadmap" style="max-width:1200px; margin:0 auto; padding:5rem 2rem; position:relative; z-index:1;">
+    <div class="section-header">
+      <span class="section-tag">// ROADMAP</span>
+      <h2 class="section-title">الخطة التفصيلية</h2>
+      <p class="section-desc">كل أسبوع بالمحتوى والموارد والتاسكات</p>
+    </div>
+
+    <!-- LEVEL 0 -->
+    <div class="roadmap-level reveal" id="level-0">
+      <div class="roadmap-level-header">
+        <div class="level-badge lvl-0">L0</div>
+        <div class="level-header-text">
+          <h2>Level 0 — التأسيس 🌐</h2>
+          <p>3 أسابيع · أساسيات الويب والشبكات والـ Version Control</p>
+        </div>
+      </div>
+
+      <div class="objectives-box">
+        <div class="objectives-title">// OBJECTIVES</div>
+        <ul class="objectives-list">
+          <li>كيف يشتغل الإنترنت والمتصفح</li>
+          <li>أساسيات HTML & CSS والـ Frontend Code</li>
+          <li><strong>Version Control</strong> — Git & GitHub</li>
+          <li>الفرق بين Relational و Non-Relational Databases</li>
+          <li>أساسيات الـ Data Structures والـ Algorithms</li>
+          <li>أساسيات الـ Operating Systems</li>
+          <li>الشبكات وكيف يشتغل الـ DNS</li>
+        </ul>
+      </div>
+
+      <div class="weeks-container">
+
+        <!-- WEEK 1 -->
+        <div class="week-item open">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 01</span>
+            <span class="week-title">HTML · CSS · Browser Developer Tools</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">HTML</span>
+              <span class="topic-pill">CSS</span>
+              <span class="topic-pill">Browser DevTools</span>
+            </div>
+
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=q3yFo-t1ykw" target="_blank">Abdelrahman Gamal — HTML Crash
+                  Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=Z-5QVutAEW4" target="_blank">Abdelrahman Gamal — CSS Crash
+                  Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=_IKTGQosYMo" target="_blank">Elzero Web School — Chrome Dev
+                  Tools</a></li>
+            </ul>
+
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9ivBf_eKCPIAYXWzLlPAm6G" target="_blank">The
+                  Net Ninja — HTML & CSS Crash Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=fxplz32rgEQ" target="_blank">Koding 101 — Chrome Dev
+                  Tools</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- WEEK 2 -->
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 02</span>
+            <span class="week-title">Version Control (Git & GitHub) · مقدمة قواعد البيانات</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Git</span>
+              <span class="topic-pill">GitHub</span>
+              <span class="topic-pill">Databases Intro</span>
+              <span class="topic-pill">SQL vs NoSQL</span>
+            </div>
+
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=Q6G-J54vgKc" target="_blank">Big Data Arabic — Git &
+                  GitHub</a></li>
+              <li><a href="https://www.youtube.com/watch?v=rQKJFlsifR8" target="_blank">GeekHood — What is a
+                  database?</a></li>
+              <li><a href="https://www.youtube.com/watch?v=WWazrq7ZC8E" target="_blank">JobStack — SQL vs NoSQL
+                  Databases</a></li>
+            </ul>
+
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=RGOj5yH7evk" target="_blank">freeCodeCamp — Git & GitHub
+                  (Full Course)</a></li>
+              <li><a href="https://www.youtube.com/watch?v=_Q07-8e3UbI" target="_blank">Giraffe Academy — What is a
+                  database?</a></li>
+              <li><a href="https://www.youtube.com/watch?v=ZS_kXvOeQ5Y" target="_blank">Academind — SQL vs NoSQL</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- WEEK 3 -->
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 03</span>
+            <span class="week-title">Network Fundamentals · DNS Servers</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Network Fundamentals</span>
+              <span class="topic-pill">HTTP/HTTPS</span>
+              <span class="topic-pill">DNS</span>
+              <span class="topic-pill">How Internet Works</span>
+            </div>
+
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLNE3WjwctlOy1ekMfZl9AbLyFivSgsfml"
+                  target="_blank">Networking & DNS — Playlist كامل</a></li>
+            </ul>
+
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLCy5RQkQgvf4yaL-AMDO8rpAAi90sWfGl"
+                  target="_blank">Network Direction — Network Fundamentals</a></li>
+              <li><a href="https://www.youtube.com/watch?v=27r4Bzuj5NQ" target="_blank">ByteByteGo — DNS Server (شرح
+                  ممتاز)</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- LEVEL 1 -->
+    <div class="roadmap-level reveal" id="level-1">
+      <div class="roadmap-level-header">
+        <div class="level-badge lvl-1">L1</div>
+        <div class="level-header-text">
+          <h2>Level 1 — البداية ⚡</h2>
+          <p>8 أسابيع + Final Project · JavaScript كامل + Node.js + Express + MongoDB</p>
+        </div>
+      </div>
+
+      <div class="objectives-box">
+        <div class="objectives-title">// OBJECTIVES</div>
+        <ul class="objectives-list">
+          <li><strong>JavaScript</strong>: Syntax، Features، OOP، Async</li>
+          <li><strong>Node.js</strong>: Packages، Modules، http module</li>
+          <li><strong>Express.js</strong>: Basics، Middlewares</li>
+          <li><strong>MongoDB</strong>: CRUD، Mongoose</li>
+        </ul>
+      </div>
+
+      <div class="weeks-container">
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 01</span>
+            <span class="week-title">JavaScript Basics — Variables · DataTypes · Numbers · Strings</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Variables & DataTypes</span>
+              <span class="topic-pill">Operators</span>
+              <span class="topic-pill">Numbers Methods</span>
+              <span class="topic-pill">String Methods</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — JavaScript [1:30]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9haFPT7J25Q9GRB_ZkFrQAc" target="_blank">The
+                  Net Ninja — Modern JavaScript [1:2]</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 02</span>
+            <span class="week-title">Arrays · Conditional Statements · Loops</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Arrays & Methods</span>
+              <span class="topic-pill">if/else</span>
+              <span class="topic-pill">switch</span>
+              <span class="topic-pill">for / while loops</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — JavaScript [31:56]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=0SyTDl4pb4w" target="_blank">Dave Gray — Arrays</a></li>
+              <li><a href="https://youtu.be/JloLGV9DmtQ?feature=shared" target="_blank">The Net Ninja — Control Flow</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 03</span>
+            <span class="week-title">Functions · Objects · Higher Order Functions · Hoisting</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Functions & Callbacks</span>
+              <span class="topic-pill">Objects</span>
+              <span class="topic-pill">Higher Order Functions</span>
+              <span class="topic-pill">Hoisting</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — [57:85]</a></li>
+              <li><a href="https://www.youtube.com/watch?v=XrCMAmxGA7o" target="_blank">Shadow Coding — Hoisting</a>
+              </li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9haFPT7J25Q9GRB_ZkFrQAc" target="_blank">The
+                  Net Ninja — Functions & Objects [4:5]</a></li>
+              <li><a href="https://www.youtube.com/watch?v=rRgD1yVwIvE" target="_blank">Traversy Media — Higher Order
+                  Array Methods</a></li>
+              <li><a href="https://www.youtube.com/watch?v=j-9_15QBW2s" target="_blank">Colt Steele — Hoisting</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 04</span>
+            <span class="week-title">Destructuring · Map/Set · Regex · Closures</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Destructuring</span>
+              <span class="topic-pill">Spread Operator</span>
+              <span class="topic-pill">Map & Set</span>
+              <span class="topic-pill">Regular Expressions</span>
+              <span class="topic-pill">Closures</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — [115:146]</a></li>
+              <li><a href="https://www.youtube.com/watch?v=a2jVZ8bUm48" target="_blank">Shadow Coding — Closure</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=NIq3qLaHCIs" target="_blank">Web Dev Simplified —
+                  Destructuring</a></li>
+              <li><a href="https://www.youtube.com/watch?v=ycohYSx5h9w" target="_blank">Traversy Media — Map, Set,
+                  WeakMap, WeakSet</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9g6m_6Sld9Q4jzqdqHd2HiD" target="_blank">The
+                  Net Ninja — Regular Expressions</a></li>
+              <li><a href="https://www.youtube.com/watch?v=aHrvi2zTlaU" target="_blank">ColorCode — Closure</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 05</span>
+            <span class="week-title">OOP · Date · Generator Functions · Modules</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">OOP in JS</span>
+              <span class="topic-pill">Classes & Inheritance</span>
+              <span class="topic-pill">Date Objects</span>
+              <span class="topic-pill">Generator Functions</span>
+              <span class="topic-pill">ES Modules</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — [147:168]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9i5yvDkJgt60vNVWffpblB7" target="_blank">The
+                  Net Ninja — OOP in JavaScript</a></li>
+              <li><a href="https://www.youtube.com/watch?v=EzdgkEMvrvA" target="_blank">dcode — Generator Functions</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=cRHQNNcYf6s" target="_blank">Web Dev Simplified — Modules</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 06</span>
+            <span class="week-title">⭐ Async Programming — Event Loop · Promises · Async/Await</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="highlight-box">
+              ⭐ <strong>أهم أسبوع في الـ JavaScript</strong> — الـ Asynchronous Programming هو قلب Node.js. افهمه كويس
+              جداً!
+            </div>
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Event Loop</span>
+              <span class="topic-pill">Callback Queue</span>
+              <span class="topic-pill">Promises</span>
+              <span class="topic-pill">Promise Chaining</span>
+              <span class="topic-pill">Callback Hell</span>
+              <span class="topic-pill">Async/Await</span>
+              <span class="topic-pill">JSON</span>
+              <span class="topic-pill">Error Handling</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv"
+                  target="_blank">Elzero Web School — [169:188]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9jx2TTZk3IGWKSbtugYdrlu" target="_blank">The
+                  Net Ninja — Async, JSON, APIs, Errors</a></li>
+              <li><a href="https://www.youtube.com/watch?v=blBoIyNhGvY" target="_blank">Dave Gray — Error Handling</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 07</span>
+            <span class="week-title">🟢 Node.js — بيئة التطوير · http module</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">What is Node.js</span>
+              <span class="topic-pill">npm & packages</span>
+              <span class="topic-pill">CommonJS Modules</span>
+              <span class="topic-pill">http module</span>
+              <span class="topic-pill">File System</span>
+              <span class="topic-pill">Processes</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLQtNtS-WfRa8OF9juY3k6WUWayMfDKHK2"
+                  target="_blank">Codezone — Node.js [1:3]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLL2zWZTDFZzgxxD66mv95I8hC0pby5bdp" target="_blank">KMR
+                  Script — Node.js [1:6]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLkzDzmo9y3VG_pByjuxE7uuLYvmWgfBub"
+                  target="_blank">Takhareef Mobarmeg — Node.js [1:20]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU" target="_blank">The
+                  Net Ninja — Node.js Crash Course [1:5]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL55RiY5tL51oGJorjEgl6NVeDbx_fO5jR"
+                  target="_blank">Academind — Node.js [1:6]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL0Zuz27SZ-6PFkIxaJ6Xx_X46avTM1aYw"
+                  target="_blank">Dave Gray — Node.js [1:5]</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 08</span>
+            <span class="week-title">Express.js Basics · MongoDB & Mongoose</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Express.js Routing</span>
+              <span class="topic-pill">Middlewares</span>
+              <span class="topic-pill">MongoDB CRUD</span>
+              <span class="topic-pill">Mongoose Schema</span>
+              <span class="topic-pill">Mongoose Models</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLL2zWZTDFZzgxxD66mv95I8hC0pby5bdp" target="_blank">KMR
+                  Script — Express & Mongoose [7:18]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLGhZWewM_75LQf3KvHo6HHSclmDyDazl7"
+                  target="_blank">Emam Academy — Express & Mongoose [13:36]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLd6o9p13Lc5387FWk_GXU0Rh5AhrBGod5"
+                  target="_blank">Mohamed Ramadan — MongoDB</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU" target="_blank">The
+                  Net Ninja — Express.js & Mongoose [6:12]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9h77dJ-QJlwGlZlTd4ecZOA" target="_blank">The
+                  Net Ninja — MongoDB</a></li>
+              <li><a href="https://www.youtube.com/watch?v=VELru-FCWDM" target="_blank">Academind — MongoDB Full
+                  Tutorial</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL0Zuz27SZ-6PFkIxaJ6Xx_X46avTM1aYw"
+                  target="_blank">Dave Gray — Express.js [6:9]</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- LEVEL 2 -->
+    <div class="roadmap-level reveal" id="level-2">
+      <div class="roadmap-level-header">
+        <div class="level-badge lvl-2">L2</div>
+        <div class="level-header-text">
+          <h2>Level 2 — الاحتراف 🔷</h2>
+          <p>11 أسبوع + Final Project · TypeScript، MVC، Auth، JWT، REST API، Testing</p>
+        </div>
+      </div>
+
+      <div class="objectives-box">
+        <div class="objectives-title">// OBJECTIVES</div>
+        <ul class="objectives-list">
+          <li><strong>TypeScript</strong>: Syntax، Features، Usage</li>
+          <li><strong>Architecture</strong>: MVC والـ Design Patterns</li>
+          <li><strong>Express</strong>: Validation، Authentication، Authorization</li>
+          <li><strong>Sessions، Cookies، JWT</strong></li>
+          <li><strong>REST APIs</strong>: Rules، Swagger، Postman</li>
+          <li><strong>Unit Testing</strong>: TDD، Jest، Supertest</li>
+          <li><strong>OAuth 2.0</strong>: Passport.js</li>
+          <li><strong>Email/SMS</strong>: Nodemailer، Twilio</li>
+          <li><strong>Deployment</strong>: Railway، Cyclic</li>
+        </ul>
+      </div>
+
+      <div class="weeks-container">
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 01</span>
+            <span class="week-title">TypeScript — Syntax · Compiling · مع Express</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Why TypeScript</span>
+              <span class="topic-pill">Types & Interfaces</span>
+              <span class="topic-pill">Generics</span>
+              <span class="topic-pill">tsconfig</span>
+              <span class="topic-pill">TS + Express</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDoPjvoNmBAy532K9M_fjiAmrJ0gkCyLJ"
+                  target="_blank">Elzero Web School — TypeScript</a></li>
+              <li><a href="https://www.youtube.com/watch?v=N17Tef8gh-Q" target="_blank">Youssef Abbas — TypeScript with
+                  Express App</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9gUgr39Q_yD6v-bSyMwKPUI" target="_blank">The
+                  Net Ninja — TypeScript Tutorial</a></li>
+              <li><a href="https://www.youtube.com/watch?v=qy8PxD3alWw" target="_blank">Colt Steele — TypeScript with
+                  Express</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 02</span>
+            <span class="week-title">MVC Architecture · Server-Side Validation · dotenv</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">MVC Pattern</span>
+              <span class="topic-pill">express-validator</span>
+              <span class="topic-pill">Environment Variables</span>
+              <span class="topic-pill">dotenv</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=yIhRWW9vB5s" target="_blank">VivaCode — MVC in Express</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=9DQuFEar2og" target="_blank">Code with Fadi —
+                  express-validator</a></li>
+              <li><a href="https://www.youtube.com/watch?v=68ssWH3cffc" target="_blank">Muhammed Essa — Environment
+                  Variables</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=Cgvopu9zg8Y" target="_blank">PedroTech — MVC in Express</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=z8m_Vy_9FIs" target="_blank">Raddy — express-validator</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=KdFhoEvSAcM" target="_blank">procademy — Environment
+                  Variables</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 03-04</span>
+            <span class="week-title">CRUD Application — بناء تطبيق كامل مع MVC + Auth</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">MVC Setup</span>
+              <span class="topic-pill">MongoDB Connection</span>
+              <span class="topic-pill">Validation</span>
+              <span class="topic-pill">Password Auth</span>
+              <span class="topic-pill">Route Protection</span>
+              <span class="topic-pill">Sessions & Cookies</span>
+              <span class="topic-pill">File Upload</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي — اختار مشروع</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLL2zWZTDFZzgxxD66mv95I8hC0pby5bdp" target="_blank">KMR
+                  Script — Online Shop App [19:42]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLXgJ7cArk9uR_xxd3iZIwTg0mKUDYsxoi"
+                  target="_blank">Abdulaziz Alzaabi — Events App [1:25]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English — اختار مشروع</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9hAJ-ARcYq_z6lDZV7kT1xD" target="_blank">The
+                  Net Ninja — Blog Website</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PL78sHffDjI75uMmHCqxil_YROcHl5ONNj"
+                  target="_blank">Easy Learning — Shopping Cart</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 05</span>
+            <span class="week-title">File Uploads · Sessions & Stores · Hashing vs Encryption</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Multer (File Upload)</span>
+              <span class="topic-pill">express-session</span>
+              <span class="topic-pill">Session Stores</span>
+              <span class="topic-pill">bcrypt</span>
+              <span class="topic-pill">Hashing & Salting</span>
+              <span class="topic-pill">SHA-256</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=j9ibqDLmKZs" target="_blank">Youssef Abbas — File Upload</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=XbpAGY6ZzHY" target="_blank">Emam Academy — Sessions</a></li>
+              <li><a href="https://www.youtube.com/watch?v=YYHtHbJnVEU" target="_blank">Index Academy — Bcrypt in
+                  Node.js</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=wIOpe8S2Mk8" target="_blank">PedroTech — File Uploads with
+                  Multer</a></li>
+              <li><a href="https://www.youtube.com/watch?v=IPAvfcodcI8" target="_blank">WittCode — Sessions</a></li>
+              <li><a href="https://www.youtube.com/watch?v=AzA_LTDoFqY" target="_blank">Sam Meech-Ward — Bcrypt in
+                  Node.js</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 06</span>
+            <span class="week-title">⭐ REST APIs · JWT · SSR vs CSR</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="highlight-box">
+              ⭐ <strong>أهم أسبوع في Level 2</strong> — الـ REST APIs والـ JWT هما أساس الـ Backend Development الحديث
+            </div>
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">SSR vs CSR</span>
+              <span class="topic-pill">REST Principles</span>
+              <span class="topic-pill">HTTP Methods</span>
+              <span class="topic-pill">Status Codes</span>
+              <span class="topic-pill">JWT</span>
+              <span class="topic-pill">Refresh Tokens</span>
+              <span class="topic-pill">Sessions vs Tokens</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=rq7DvjN1Gco" target="_blank">Tarmeez — Intro to APIs</a></li>
+              <li><a href="https://www.youtube.com/watch?v=aanOygFD4Fo" target="_blank">pragma — Sessions vs. Tokens</a>
+              </li>
+              <li><a href="https://www.youtube.com/playlist?list=PLQtNtS-WfRa8OF9juY3k6WUWayMfDKHK2"
+                  target="_blank">Codezone — REST APIs & JWT [5:8]</a></li>
+              <li><a href="https://www.youtube.com/watch?v=RcqyAVnMaeQ" target="_blank">Eslam Mahmoud — JWT</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=0oXYLzuucwE" target="_blank">Academind — REST APIs
+                  explained</a></li>
+              <li><a href="https://www.youtube.com/watch?v=fgTGADljAeg" target="_blank">Web Dev Simplified — REST APIs
+                  with Express</a></li>
+              <li><a href="https://www.youtube.com/watch?v=7Q17ubqLfaM" target="_blank">Web Dev Simplified — JWT Part
+                  1</a></li>
+              <li><a href="https://www.youtube.com/watch?v=mbsmsi7l3r4" target="_blank">Web Dev Simplified — JWT Part
+                  2</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 07</span>
+            <span class="week-title">Advanced MongoDB — Queries · Filtering · Pagination</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Advanced Queries</span>
+              <span class="topic-pill">Filtration</span>
+              <span class="topic-pill">Pagination</span>
+              <span class="topic-pill">Population</span>
+              <span class="topic-pill">Aggregation</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLDQ11FgmbqQNFuGQTKbAIGEyOKWUGBs6i"
+                  target="_blank">Index Academy — MongoDB (الفيديوهات عن queries, filtration, pagination,
+                  population)</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL1BztTYDF-QPdTvgsjf8HOwO4ZVl_LhxS"
+                  target="_blank">procademy — MongoDB [73:87]</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 08</span>
+            <span class="week-title">Build Complete REST API — Ecommerce API</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي — اختار مشروع</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLQtNtS-WfRa8OF9juY3k6WUWayMfDKHK2"
+                  target="_blank">Codezone — Ecommerce API [5:9]</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLGhZWewM_75ILwl15d0Cn-W_XHpnKbNHL"
+                  target="_blank">Emam Academy — Ecommerce API</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English — اختار مشروع</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL55RiY5tL51q4D-B63KBnygU6opNPFk_q"
+                  target="_blank">Academind — Ecommerce API</a></li>
+              <li><a href="https://www.youtube.com/watch?v=BWUi6BS9T5Y" target="_blank">TomDoesTech — Ecommerce API with
+                  TypeScript ⭐</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 09</span>
+            <span class="week-title">OAuth 2.0 · Passport.js · API Security · Rate Limiting</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">OAuth 2.0 Flow</span>
+              <span class="topic-pill">Passport.js</span>
+              <span class="topic-pill">Google Strategy</span>
+              <span class="topic-pill">API Security</span>
+              <span class="topic-pill">Rate Limiting</span>
+              <span class="topic-pill">CORS</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=86qNjL7I00w" target="_blank">Almadrasa — OAuth 2.0 Intro</a>
+              </li>
+              <li><a href="https://www.youtube.com/playlist?list=PLfDx4cQoUNOZ6BVx8IuvTdrxiRQhDHmPK"
+                  target="_blank">Algorithm Academy — Passport.js Strategies</a></li>
+              <li><a href="https://www.youtube.com/watch?v=a0g8rI4j4qc" target="_blank">Ahmed Elemam — API Security</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=g2GUBz-Trls" target="_blank">Youssef Abbas — Rate
+                  Limiting</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9jdm7QX143aMLAqyM-jTZ2x" target="_blank">The
+                  Net Ninja — OAuth2.0 Strategies</a></li>
+              <li><a href="https://www.youtube.com/watch?v=YYe0FdfdgDU" target="_blank">freeCodeCamp — API Security</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 10</span>
+            <span class="week-title">SMTP · Sending Emails · SMS with Twilio</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">SMTP Protocol</span>
+              <span class="topic-pill">Nodemailer</span>
+              <span class="topic-pill">Email Templates</span>
+              <span class="topic-pill">Twilio SMS API</span>
+              <span class="topic-pill">Email Confirmation</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=W3xCWR5WjvY" target="_blank">DeepWave Technology — SMTP</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=AGErsRWd-6Y" target="_blank">Youssef Abbas — Sending
+                  Emails</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=nF9g1825mwk" target="_blank">Traversy Media — Sending Emails
+                  with Node.js</a></li>
+              <li><a href="https://www.youtube.com/watch?v=vs4in-UFdX0" target="_blank">AyyazTech — Sending SMS with
+                  Twilio</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 11</span>
+            <span class="week-title">Unit Testing · API Documentation · Deployment</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Jest</span>
+              <span class="topic-pill">Supertest</span>
+              <span class="topic-pill">TDD</span>
+              <span class="topic-pill">Swagger / OpenAPI</span>
+              <span class="topic-pill">Postman Docs</span>
+              <span class="topic-pill">Railway Deploy</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLzNfs-3kBUJllCa8_6pLYDMnIlg6Lfvu4"
+                  target="_blank">Tresmerge — Unit Testing FULL ⭐ (موصى به)</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLMYF6NkLrdN_CelwcY-B9PPi4UsXmU8Ka"
+                  target="_blank">Mohamed Essa — Swagger.io API Documentation</a></li>
+              <li><a href="https://www.youtube.com/watch?v=0etHXuy_vbk" target="_blank">Mahmoud Abdullah — Deployment on
+                  Cyclic</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=FgnxcUQ5vho" target="_blank">Web Dev Simplified — Unit
+                  Testing in JavaScript</a></li>
+              <li><a href="https://www.youtube.com/watch?v=t5sFkGk8GY8" target="_blank">Anson the Developer — Unit
+                  Testing in Express</a></li>
+              <li><a href="https://www.youtube.com/watch?v=dhMlXoTD3mQ" target="_blank">Skills With Arif — Swagger with
+                  Express</a></li>
+              <li><a href="https://www.youtube.com/watch?v=4Ga4c_amvY8" target="_blank">Rahat WebDev — Deployment on
+                  Railway</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- LEVEL 3 -->
+    <div class="roadmap-level reveal" id="level-3">
+      <div class="roadmap-level-header">
+        <div class="level-badge lvl-3">L3</div>
+        <div class="level-header-text">
+          <h2>Level 3 — المتقدم 🔥</h2>
+          <p>9 أسابيع + Final Project · SQL، GraphQL، Realtime، Redis، Payments</p>
+        </div>
+      </div>
+
+      <div class="objectives-box">
+        <div class="objectives-title">// OBJECTIVES</div>
+        <ul class="objectives-list">
+          <li><strong>SQL Databases</strong>: MySQL، PostgreSQL، SQLite، SQL Server</li>
+          <li><strong>ORMs</strong>: Prisma، Sequelize، TypeORM</li>
+          <li><strong>GraphQL</strong>: Apollo Server</li>
+          <li><strong>Real-Time</strong>: Socket.io، WebRTC</li>
+          <li><strong>Redis</strong>: Caching، Performance</li>
+          <li><strong>Puppeteer</strong>: Web Scraping، E2E Testing</li>
+          <li><strong>Payments</strong>: Stripe، PayPal، Paymob</li>
+          <li><strong>Task Scheduling</strong>: node-schedule</li>
+        </ul>
+      </div>
+
+      <div class="weeks-container">
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 01</span>
+            <span class="week-title">SQL Syntax — اختار DBMS واحد</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">SELECT / INSERT / UPDATE / DELETE</span>
+              <span class="topic-pill">JOINs</span>
+              <span class="topic-pill">Indexes</span>
+              <span class="topic-pill">Constraints</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي — اختار DBMS</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=K9o0mRuqzqQ" target="_blank">CodeRK — MySQL Crash Course</a>
+              </li>
+              <li><a href="https://www.youtube.com/playlist?list=PLqmv-PiN1b7hLJ_2ktdE9YX7Ba_7UZq3f"
+                  target="_blank">Mohamed Gbreel — PostgreSQL Crash Course</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLE8kQVoC67Py5LnCUHp_wp2uzbaBZWSmx"
+                  target="_blank">Metigator — SQL Server Full Course</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English — اختار DBMS</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=9ylj9NR0Lcg" target="_blank">Traversy Media — MySQL Crash
+                  Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=zw4s3Ey8ayo" target="_blank">Troy Amelotte — PostgreSQL Crash
+                  Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=HXV3zeQKqGY" target="_blank">freeCodeCamp — MySQL Full
+                  Course</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 02</span>
+            <span class="week-title">Database Design · SQL inside Node.js</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">ER Diagrams</span>
+              <span class="topic-pill">Normalization</span>
+              <span class="topic-pill">Foreign Keys</span>
+              <span class="topic-pill">DB Drivers</span>
+              <span class="topic-pill">pg / mysql2 / mssql</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLE8kQVoC67Py5LnCUHp_wp2uzbaBZWSmx"
+                  target="_blank">Tech Vault — Database Design</a></li>
+              <li><a href="https://www.youtube.com/watch?v=SIxgA9CP1A8" target="_blank">KMR Script — MySQL inside
+                  Node.js</a></li>
+              <li><a href="https://www.youtube.com/watch?v=JR_wlj72dTQ" target="_blank">Hamza Rashed — PostgreSQL inside
+                  Node.js</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLwvrYc43l1MxAEOI_KwGe8l42uJxMoKeS"
+                  target="_blank">Amigoscode — PostgreSQL Full Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=EN6Dx22cPRI" target="_blank">Traversy Media — MySQL inside
+                  Node.js</a></li>
+              <li><a href="https://node-postgres.com/" target="_blank">Official Docs — node-postgres (pg)</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 03</span>
+            <span class="week-title">ORMs — Prisma / Sequelize / TypeORM · Migrations</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Prisma</span>
+              <span class="topic-pill">Sequelize</span>
+              <span class="topic-pill">TypeORM</span>
+              <span class="topic-pill">Migrations</span>
+              <span class="topic-pill">Schema Design</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLfDx4cQoUNObHX28K6FS38LkB2CPLGGfx"
+                  target="_blank">Algorithm Academy — Sequelize</a></li>
+              <li><a href="https://www.youtube.com/watch?v=TmVRKDoMulE" target="_blank">pragma — Database Migrations ⭐
+                  (موصى به)</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=RebA5J-rlwg" target="_blank">Web Dev Simplified — Prisma</a>
+              </li>
+              <li><a href="https://www.youtube.com/playlist?list=PLkqiWyX-_Lov8qmMOVn4SEQwr9yOjNn3f"
+                  target="_blank">WittCode — Sequelize</a></li>
+              <li><a href="https://www.youtube.com/watch?v=Reb7ISQZCvA" target="_blank">CoderOne — TypeORM</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 04-05</span>
+            <span class="week-title">🔌 WebSocket · Socket.io · Chat Application</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">WebSocket Protocol</span>
+              <span class="topic-pill">Socket.io Server</span>
+              <span class="topic-pill">Socket.io Client</span>
+              <span class="topic-pill">Rooms & Namespaces</span>
+              <span class="topic-pill">WebRTC</span>
+              <span class="topic-pill">Real-time Chat</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=IUfCXmQwm1w" target="_blank">Codezone — Socket.io</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLL2zWZTDFZzgxxD66mv95I8hC0pby5bdp" target="_blank">KMR
+                  Script — Chat Application [52:63]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=ZKEqqIO7n-k" target="_blank">Web Dev Simplified —
+                  Socket.io</a></li>
+              <li><a href="https://www.youtube.com/watch?v=mYy-d6BtqmU" target="_blank">Coding with Dawid — Chat App
+                  with React ⭐</a></li>
+              <li><a href="https://www.youtube.com/watch?v=DvlyzDZDEq4" target="_blank">Web Dev Simplified — Video &
+                  Audio Streaming</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 06</span>
+            <span class="week-title">Puppeteer — Web Scraping & Browser Automation</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=gh7TmUcku8M" target="_blank">Tresmerge — Puppeteer</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=S67gyqnYHmI" target="_blank">Traversy Media — Puppeteer Crash
+                  Course</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 07</span>
+            <span class="week-title">Payment Gateways — Stripe · PayPal · Paymob</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=isakqT0fOsY" target="_blank">JobStack — Payment Integration
+                  Session</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLkzDzmo9y3VETa2XvIch29djB47v4zJQS"
+                  target="_blank">Takhareef Mobarmeg — PayPal Integration [39:41]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=mI_-1tbIXQI" target="_blank">Web Dev Simplified — Stripe
+                  Integration</a></li>
+              <li><a href="https://www.youtube.com/watch?v=DNM9FdFrI1k" target="_blank">Web Dev Simplified — PayPal
+                  Integration</a></li>
+            </ul>
+
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 08</span>
+            <span class="week-title">📐 GraphQL — Apollo Server</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">GraphQL Schema</span>
+              <span class="topic-pill">Queries & Mutations</span>
+              <span class="topic-pill">Resolvers</span>
+              <span class="topic-pill">Apollo Server</span>
+              <span class="topic-pill">Subscriptions</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=QonyaNVeEGo" target="_blank">Yallacode — What is GraphQL</a>
+              </li>
+              <li><a href="https://www.youtube.com/watch?v=sYJy7sOz_Sw" target="_blank">Yallacode — GraphQL in
+                  Node.js</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PL4cUxeGkcC9gUxtblNUahcsg0WLxmrK_y" target="_blank">The
+                  Net Ninja — GraphQL</a></li>
+              <li><a href="https://www.youtube.com/watch?v=ZQL7tL2S0oQ" target="_blank">Web Dev Simplified — GraphQL
+                  Crash Course</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 09</span>
+            <span class="week-title">⚡ Redis Caching · Task Scheduling</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-topics">🎯 TOPICS</div>
+            <div class="topics-list">
+              <span class="topic-pill">Caching Strategies</span>
+              <span class="topic-pill">Redis</span>
+              <span class="topic-pill">node-cache</span>
+              <span class="topic-pill">node-schedule</span>
+              <span class="topic-pill">Cron Jobs</span>
+            </div>
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=XP32O_gMZkA" target="_blank">JobStack — Scaling App with
+                  Caching Strategies ⭐ (موصى به)</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/watch?v=jgpVdJB2sKQ" target="_blank">Web Dev Simplified — Redis Crash
+                  Course</a></li>
+              <li><a href="https://www.youtube.com/watch?v=oaJq1mQ3dFI" target="_blank">Traversy Media — Redis in
+                  Node.js</a></li>
+              <li><a href="https://www.youtube.com/watch?v=Ezv30i47sDs" target="_blank">Raddy — node-schedule</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- LEVEL 4 -->
+    <div class="roadmap-level reveal" id="level-4">
+      <div class="roadmap-level-header">
+        <div class="level-badge lvl-4">L4</div>
+        <div class="level-header-text">
+          <h2>Level 4 — الخبرة 🏆</h2>
+          <p>4+ أسابيع · Design Patterns، Microservices، System Design، DevOps</p>
+        </div>
+      </div>
+
+      <div class="objectives-box">
+        <div class="objectives-title">// OBJECTIVES</div>
+        <ul class="objectives-list">
+          <li><strong>Hosting</strong>: Linux، SSH، VPS</li>
+          <li><strong>Web Security</strong>: تجنب الهجمات</li>
+          <li><strong>Microservices</strong>: Design Patterns</li>
+          <li><strong>Automation</strong>: CI/CD Pipelines</li>
+          <li><strong>System Design</strong>: تصميم أنظمة معقدة</li>
+          <li><strong>SDLC</strong>: Agile، DevOps Workflow</li>
+          <li><strong>Containers</strong>: Docker، Kubernetes</li>
+        </ul>
+      </div>
+
+      <div class="weeks-container">
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 01</span>
+            <span class="week-title">Creational Design Patterns — Builder · Factory · Singleton · Prototype</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLNE3WjwctlOznMzwM4hlMIXBw2Bf6zWc4"
+                  target="_blank">Passionate Coders — Design Patterns</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLd-dOEgzBpGnt3GuEszo_piQq52XSqAmj"
+                  target="_blank">DevGeeks Academy — Creational Patterns [12:16]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLNE3WjwctlOz3Gx66tO5wxXu2C5E3Oj8i"
+                  target="_blank">Design Patterns Playlist [1:9]</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 02</span>
+            <span class="week-title">Structural Design Patterns — Adapter · Bridge · Decorator · Proxy</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLnqAlQ9hFYdcW3viz_oXRal_FNkg2Dssm"
+                  target="_blank">Mohamed Reda — Structural Patterns</a></li>
+              <li><a href="https://www.youtube.com/playlist?list=PLd-dOEgzBpGnt3GuEszo_piQq52XSqAmj"
+                  target="_blank">DevGeeks Academy — [17:23]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLNE3WjwctlOz3Gx66tO5wxXu2C5E3Oj8i"
+                  target="_blank">Design Patterns Playlist [10:22]</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="week-item">
+          <div class="week-header" onclick="toggleWeek(this)">
+            <span class="week-num">WEEK 03-04</span>
+            <span class="week-title">Behavioral Design Patterns — Observer · Chain of Responsibility · Strategy</span>
+            <span class="week-toggle">▼</span>
+          </div>
+          <div class="week-body">
+            <div class="week-section-title ws-arabic">🌏 عربي</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLd-dOEgzBpGnt3GuEszo_piQq52XSqAmj"
+                  target="_blank">DevGeeks Academy — Behavioral Patterns [1:11]</a></li>
+            </ul>
+            <div class="week-section-title ws-english">🌏 English</div>
+            <ul class="resource-list">
+              <li><a href="https://www.youtube.com/playlist?list=PLNE3WjwctlOz3Gx66tO5wxXu2C5E3Oj8i"
+                  target="_blank">Design Patterns Playlist [23:37]</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-tag">// PROJECTS</span>
+      <h2 class="section-title">المشاريع العملية</h2>
+      <p class="section-desc">6 مشاريع من الأبسط للأكثر تعقيداً — ابنيهم كلهم وحطهم على GitHub</p>
+    </div>
+
+    <div class="projects-grid">
+
+      <div class="project-card p1 reveal">
+        <span class="project-level-badge pb-l1">LEVEL 1 — FINAL PROJECT</span>
+        <div class="project-title">🔗 URL Shortener</div>
+        <p class="project-desc">تطبيق اختصار روابط — المستخدم بيدخل URL طويل والتطبيق بيولده رابط قصير يعمل redirect
+          تلقائي</p>
+        <ul class="project-criteria">
+          <li>التطبيق بيشتغل locally من غير crashes</li>
+          <li>المستخدم بيدخل URL ويجيب رابط قصير يعمل redirect</li>
+          <li>الروابط المختصرة قبل كده بتظهر في الـ Homepage</li>
+          <li>مفيش حاجة لـ Authentication</li>
+        </ul>
+        <div class="project-stack">
+          <span class="stack-tag">Node.js</span>
+          <span class="stack-tag">Express</span>
+          <span class="stack-tag">MongoDB</span>
+          <span class="stack-tag">Mongoose</span>
+        </div>
+      </div>
+
+      <div class="project-card p2 reveal">
+        <span class="project-level-badge pb-l2">LEVEL 2 — FINAL PROJECT</span>
+        <div class="project-title">📚 Task Grading Hub</div>
+        <p class="project-desc">نظام لإدارة المهام والتصحيح — الطلاب بيعملوا أكونت ويرفعوا التاسكات والدكتور بياخد الدور
+          Admin ويدي الدرجات</p>
+        <ul class="project-criteria">
+          <li>REST API مع JWT Authentication</li>
+          <li>Admin Routes محمية — الطلاب بس يرفعوا</li>
+          <li>رفع ملفات PDF للتاسكات</li>
+          <li>Server-Side Validation كاملة</li>
+          <li>API Documentation بـ Swagger</li>
+          <li>Unit Tests شغالة ومكتملة</li>
+        </ul>
+        <div class="project-stack">
+          <span class="stack-tag">TypeScript</span>
+          <span class="stack-tag">Express</span>
+          <span class="stack-tag">MongoDB</span>
+          <span class="stack-tag">JWT</span>
+          <span class="stack-tag">Multer</span>
+          <span class="stack-tag">Jest</span>
+          <span class="stack-tag">Swagger</span>
+        </div>
+      </div>
+
+      <div class="project-card p3 reveal">
+        <span class="project-level-badge pb-l3">LEVEL 3 — MID PROJECT</span>
+        <div class="project-title">⚽ Egyptian League Dashboard</div>
+        <p class="project-desc">API لإدارة الدوري المصري — بحث عن لاعبين، نقل اللاعبين بين الأندية، تغيير المرتبات، عرض
+          الفرق</p>
+        <ul class="project-criteria">
+          <li>ORM متصل بقاعدة بيانات Relational</li>
+          <li>CRUD كامل للفرق واللاعبين</li>
+          <li>بحث باسم اللاعب</li>
+          <li>نقل لاعب من فريق لفريق</li>
+          <li>تغيير المرتب ولون الزي</li>
+          <li>Database Design محكم</li>
+        </ul>
+        <div class="project-stack">
+          <span class="stack-tag">PostgreSQL/MySQL</span>
+          <span class="stack-tag">Prisma/Sequelize</span>
+          <span class="stack-tag">Express</span>
+          <span class="stack-tag">REST API</span>
+        </div>
+      </div>
+
+      <div class="project-card p1 reveal">
+        <span class="project-level-badge pb-l3">LEVEL 3 — TASK</span>
+        <div class="project-title">🕵️ Job Stalker App</div>
+        <p class="project-desc">تطبيق بيسترج بيانات من LinkedIn Profile باستخدام Puppeteer ويعرضها للمستخدم عشان يقرر لو
+          المرشح كويس ولا لا</p>
+        <ul class="project-criteria">
+          <li>المستخدم بيدخل LinkedIn Profile URL</li>
+          <li>الـ App بيعمل scraping للبروفايل</li>
+          <li>بيعرض البيانات بشكل واضح</li>
+        </ul>
+        <div class="project-stack">
+          <span class="stack-tag">Express.js</span>
+          <span class="stack-tag">Puppeteer</span>
+          <span class="stack-tag">Web Scraping</span>
+        </div>
+      </div>
+
+      <div class="project-card p4 reveal" style="grid-column: 1 / -1;">
+        <span class="project-level-badge pb-l3">LEVEL 3 — FINAL PROJECT ⭐ الأكبر</span>
+        <div class="project-title">🛒 Online Marketplace</div>
+        <p class="project-desc">
+          منصة متكاملة للبيع والشراء أونلاين مع Real-time Chat بين البائع والمشتري — بتضم GraphQL API، Socket.IO للتواصل
+          الفوري، وتكامل مع PayPal للدفع
+        </p>
+        <ul class="project-criteria" style="columns:2; gap:2rem;">
+          <li>GraphQL API مع Apollo Server</li>
+          <li>Real-time messaging بـ Socket.IO</li>
+          <li>PayPal Integration للدفع</li>
+          <li>JWT Authentication & Authorization</li>
+          <li>Server-side Validation كاملة</li>
+          <li>رفع صور المنتجات</li>
+          <li>API Documentation</li>
+          <li>Unit Tests شاملة</li>
+        </ul>
+        <div class="project-stack" style="margin-top:1rem;">
+          <span class="stack-tag">GraphQL</span>
+          <span class="stack-tag">Apollo Server</span>
+          <span class="stack-tag">Socket.IO</span>
+          <span class="stack-tag">PayPal</span>
+          <span class="stack-tag">JWT</span>
+          <span class="stack-tag">PostgreSQL</span>
+          <span class="stack-tag">Prisma</span>
+          <span class="stack-tag">Jest</span>
+          <span class="stack-tag">Swagger</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section id="jobs">
+    <div class="section-header">
+      <span class="section-tag">// CAREERS</span>
+      <h2 class="section-title">فرص العمل بعد الـ Roadmap</h2>
+      <p class="section-desc">إيه اللي تتوقعه في سوق الشغل بعد ما تخلص كل مستوى</p>
+    </div>
+
+    <div class="jobs-grid">
+
+      <div class="job-card jb-1 reveal">
+        <span class="job-icon">⚡</span>
+        <div class="job-title">Junior Node.js Developer</div>
+        <span class="job-level">بعد Level 1 + Level 2</span>
+        <p class="job-desc">تقدر تشتغل كـ Junior Backend Developer في شركات المنتجات والـ Startups. بتبني REST APIs
+          وبتتعامل مع MongoDB.</p>
+        <div class="job-skills">
+          <span class="job-skill">Node.js</span>
+          <span class="job-skill">Express</span>
+          <span class="job-skill">MongoDB</span>
+          <span class="job-skill">REST API</span>
+          <span class="job-skill">JWT</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب (مصر)</span>
+          <span class="salary-range">8,000 – 15,000 EGP</span>
+        </div>
+      </div>
+
+      <div class="job-card jb-2 reveal">
+        <span class="job-icon">🔷</span>
+        <div class="job-title">Backend Developer (TypeScript)</div>
+        <span class="job-level">بعد Level 2 كامل</span>
+        <p class="job-desc">فرص أكبر في الشركات الكبيرة والـ Remote Jobs. الـ TypeScript بيفتح أبواب تاني خالص خصوصاً في
+          شركات أوروبا وأمريكا.</p>
+        <div class="job-skills">
+          <span class="job-skill">TypeScript</span>
+          <span class="job-skill">MVC</span>
+          <span class="job-skill">Testing</span>
+          <span class="job-skill">Swagger</span>
+          <span class="job-skill">OAuth</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب (مصر)</span>
+          <span class="salary-range">15,000 – 25,000 EGP</span>
+        </div>
+      </div>
+
+      <div class="job-card jb-3 reveal">
+        <span class="job-icon">🔥</span>
+        <div class="job-title">Full Stack Developer</div>
+        <span class="job-level">بعد Level 2 + Frontend</span>
+        <p class="job-desc">لو بتعرف React أو أي Frontend Framework، تقدر تشتغل Full Stack وتاخد فرص أكتر بمرتبات أعلى.
+        </p>
+        <div class="job-skills">
+          <span class="job-skill">Node.js</span>
+          <span class="job-skill">React/Vue</span>
+          <span class="job-skill">MongoDB</span>
+          <span class="job-skill">REST API</span>
+          <span class="job-skill">Deployment</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب (مصر)</span>
+          <span class="salary-range">18,000 – 30,000 EGP</span>
+        </div>
+      </div>
+
+      <div class="job-card jb-4 reveal">
+        <span class="job-icon">⚡</span>
+        <div class="job-title">Senior Backend Engineer</div>
+        <span class="job-level">بعد Level 3 + خبرة 2-3 سنين</span>
+        <p class="job-desc">بعد ما تعدي Level 3 وتبني مشاريع حقيقية. GraphQL و Redis والـ Real-time بيخلوك مطلوب جداً في
+          سوق الشغل.</p>
+        <div class="job-skills">
+          <span class="job-skill">GraphQL</span>
+          <span class="job-skill">Redis</span>
+          <span class="job-skill">Socket.io</span>
+          <span class="job-skill">SQL</span>
+          <span class="job-skill">Microservices</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب (مصر)</span>
+          <span class="salary-range">30,000 – 60,000 EGP</span>
+        </div>
+      </div>
+
+      <div class="job-card jb-5 reveal">
+        <span class="job-icon">🌍</span>
+        <div class="job-title">Remote Backend Developer</div>
+        <span class="job-level">بعد Level 2-3 + Portfolio</span>
+        <p class="job-desc">الـ Node.js من أكثر التكنولوجيات طلباً في الـ Remote Jobs على منصات زي Upwork وToptal. الـ
+          Portfolio هو كل حاجة.</p>
+        <div class="job-skills">
+          <span class="job-skill">English</span>
+          <span class="job-skill">GitHub Portfolio</span>
+          <span class="job-skill">Node.js</span>
+          <span class="job-skill">API Design</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب</span>
+          <span class="salary-range">$1,500 – $5,000/month</span>
+        </div>
+      </div>
+
+      <div class="job-card jb-6 reveal">
+        <span class="job-icon">🏗️</span>
+        <div class="job-title">Solutions Architect / Tech Lead</div>
+        <span class="job-level">بعد Level 4 + 4-5 سنين خبرة</span>
+        <p class="job-desc">الـ Design Patterns والـ System Design بيفتحوا باب الـ Tech Lead. تاخد مسؤولية قرارات
+          Architecture كاملة للـ Team.</p>
+        <div class="job-skills">
+          <span class="job-skill">System Design</span>
+          <span class="job-skill">Design Patterns</span>
+          <span class="job-skill">DevOps</span>
+          <span class="job-skill">Team Lead</span>
+        </div>
+        <div class="job-salary">
+          <span class="salary-label">💰 متوسط الراتب (مصر)</span>
+          <span class="salary-range">60,000+ EGP</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section style="max-width:1200px; margin:0 auto; padding:5rem 2rem; position:relative; z-index:1;">
+    <div class="section-header">
+      <span class="section-tag">// TIMELINE</span>
+      <h2 class="section-title">خطة زمنية مقترحة</h2>
+      <p class="section-desc">تقدير الوقت اللازم لكل مستوى مع الالتزام</p>
+    </div>
+
+    <div class="timeline reveal">
+      <div class="timeline-item">
+        <div class="timeline-dot td-0"></div>
+        <div class="timeline-content">
+          <div class="timeline-phase tp-0">LEVEL 0</div>
+          <div class="timeline-title">التأسيس — HTML, CSS, Git, Networks</div>
+          <p class="timeline-desc">3 أسابيع تعلم كثيف. الهدف الأساسي فهم كيف الإنترنت بيشتغل وإزاي تستخدم Git صح.</p>
+          <span class="timeline-duration">⏱ 3 أسابيع</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot td-1"></div>
+        <div class="timeline-content">
+          <div class="timeline-phase tp-1">LEVEL 1</div>
+          <div class="timeline-title">البداية — JavaScript + Node.js + Express + MongoDB</div>
+          <p class="timeline-desc">8 أسابيع + وقت المشروع. ركز على الـ Async Programming، ده القلب. المشروع النهائي URL
+            Shortener لازم تعمله بإيدك.</p>
+          <span class="timeline-duration">⏱ 2-3 أشهر</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot td-2"></div>
+        <div class="timeline-content">
+          <div class="timeline-phase tp-2">LEVEL 2</div>
+          <div class="timeline-title">الاحتراف — TypeScript + Auth + REST API + Testing</div>
+          <p class="timeline-desc">11 أسبوع. ده المستوى اللي بعده تقدر تدور على شغل كـ Junior Developer. التركيز على الـ
+            JWT و REST API.</p>
+          <span class="timeline-duration">⏱ 3-4 أشهر</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot td-3"></div>
+        <div class="timeline-content">
+          <div class="timeline-phase tp-3">LEVEL 3</div>
+          <div class="timeline-title">المتقدم — SQL + GraphQL + Socket.io + Redis</div>
+          <p class="timeline-desc">9 أسابيع + مشروع ضخم. المشروع الـ Online Marketplace ده من أهم مشاريع الـ Portfolio.
+          </p>
+          <span class="timeline-duration">⏱ 3-4 أشهر</span>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot td-4"></div>
+        <div class="timeline-content">
+          <div class="timeline-phase tp-4">LEVEL 4 + JOB</div>
+          <div class="timeline-title">الخبرة وسوق الشغل</div>
+          <p class="timeline-desc">الـ Design Patterns والـ System Design مستمر مع الخبرة. ابدأ تبعت CVs من Level 2 وما
+            تستنيش تخلص كل حاجة.</p>
+          <span class="timeline-duration">⏱ مستمر</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIPS -->
+  <section id="tips" style="max-width:1200px; margin:0 auto; padding:5rem 2rem; position:relative; z-index:1;">
+    <div class="section-header">
+      <span class="section-tag">// PRO TIPS</span>
+      <h2 class="section-title">نصائح للنجاح في الـ Roadmap</h2>
+      <p class="section-desc">من تجارب ناس اشتغلوا في المجال</p>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card reveal">
+        <span class="tip-number">01</span>
+        <div class="tip-title">اعمل مشاريع من يومك الأول</div>
+        <p class="tip-desc">ما تستناش تخلص الـ Roadmap عشان تعمل مشاريع. من أول أسبوع في Level 1 ابدأ تبني حاجة صغيرة.
+          الـ Portfolio أهم من الشهادة.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">02</span>
+        <div class="tip-title">GitHub عمره ما هياخد إجازة</div>
+        <p class="tip-desc">Commit كل يوم. لو ما فيش مشروع جديد، Commit في مشروع قديم أو تعديل. الـ Contribution Graph
+          الأخضر بيتكلم بدلك وانت بتقدم على وظيفة.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">03</span>
+        <div class="tip-title">فهم أعمق من السرعة</div>
+        <p class="tip-desc">ما تعديش على الـ Week عشان تقول خلصتها. لو ما فهمتش الـ Async Programming مثلاً هتعاني بعد
+          كده. البطء الآن = السرعة بعدين.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">04</span>
+        <div class="tip-title">ابدأ دور على شغل من Level 2</div>
+        <p class="tip-desc">ما تستناش Level 4 عشان تبعت CV. من Level 2 وعندك REST API و JWT و MongoDB ده كافي لـ Junior
+          Position في كتير من الشركات.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">05</span>
+        <div class="tip-title">Documentation دايماً</div>
+        <p class="tip-desc">تعود على قراءة الـ Official Documentation من أول ما تتعلم. Stack Overflow والـ YouTube مش
+          هيبقوا كافيين دايماً، الـ Docs هو اللي هيفيدك في الشغل.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">06</span>
+        <div class="tip-title">الأنجليزي مش اختياري</div>
+        <p class="tip-desc">أفضل المصادر والمجتمعات والشركات بالإنجليزي. استثمر وقت في تحسين الأنجليزي بالتوازي مع الـ
+          Roadmap. ده هيضاعف فرصك 10x.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">07</span>
+        <div class="tip-title">Error ≠ فشل</div>
+        <p class="tip-desc">الـ Error هو أكتر حاجة هتتعلم منها. لما تواجه bug، ما تروحش للحل على طول. فكر لمدة 30 دقيقة
+          أو أكتر قبل ما تسأل. ده اللي بيخلي Developer أحسن من غيره.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">08</span>
+        <div class="tip-title">انضم لـ Communities</div>
+        <p class="tip-desc">Egypt JS، Discord Servers للـ Web Dev، ومجتمعات GitHub. الناس دي هتساعدك، هتعرف فرص شغل،
+          وهتبقى motivated لما تشوف ناس تانية بتعمل نفس الرحلة.</p>
+      </div>
+
+      <div class="tip-card reveal">
+        <span class="tip-number">09</span>
+        <div class="tip-title">Specialize بعد Level 2</div>
+        <p class="tip-desc">بعد Level 2، قرر هتروح ناحية إيه — FinTech، EdTech، E-commerce؟ تخصصك في Domain بجانب الـ
+          Technical Skills بيرفع قيمتك في السوق كتير.</p>
+      </div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal reveal" style="margin-top:3rem;">
+      <div class="terminal-bar">
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+        <span class="terminal-file">nodejs-career.sh</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">cat roadmap-summary.txt</span></div>
+        <div style="margin-top:0.5rem; color:var(--text3)">---</div>
+        <div><span class="t-output">✓ Level 0</span> <span class="t-comment">→ الأساسيات — 3 أسابيع</span></div>
+        <div><span class="t-output">✓ Level 1</span> <span class="t-comment">→ JS + Node + Express + MongoDB — 2-3
+            أشهر</span></div>
+        <div><span class="t-output">✓ Level 2</span> <span class="t-comment">→ TypeScript + Auth + REST + Testing — 3-4
+            أشهر</span></div>
+        <div><span class="t-output">✓ Level 3</span> <span class="t-comment">→ SQL + GraphQL + Realtime + Redis — 3-4
+            أشهر</span></div>
+        <div><span class="t-output">✓ Level 4</span> <span class="t-comment">→ Patterns + DevOps + System Design —
+            مستمر</span></div>
+        <div style="margin-top:0.5rem; color:var(--text3)">---</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">node --version</span></div>
+        <div><span class="t-output">v22.x.x</span></div>
+        <div style="margin-top:0.3rem;"><span class="t-prompt">$</span> <span class="t-cmd">npm init my-career</span>
+        </div>
+        <div><span class="t-output">🚀 Career initialized successfully!</span></div>
+        <div style="color:var(--text3)"><span class="t-comment"># ابدأ دلوقتي — كل يوم سطر كود بيفرق 🟢</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= QUIZ SECTION ========================= -->
+  <section id="quiz" style="max-width:100%; margin:0; padding:0; position:relative; z-index:1;">
+    <div class="quiz-wrapper">
+
+      <!-- Quiz CSS -->
+      <style>
+        /* ===== QUIZ WRAPPER ===== */
+        .quiz-wrapper {
+          min-height: 100vh;
+          background: #020409;
+          position: relative;
+          overflow: hidden;
+          padding: 5rem 2rem;
+          font-family: 'Cairo', sans-serif;
+        }
+
+        .quiz-wrapper::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 255, 136, 0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 80% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+          pointer-events: none;
+        }
+
+        .quiz-grid-bg {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(0, 255, 136, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.025) 1px, transparent 1px);
+          background-size: 40px 40px;
+          pointer-events: none;
+        }
+
+        /* ===== QUIZ HEADER ===== */
+        .quiz-header {
+          text-align: center;
+          margin-bottom: 3rem;
+          position: relative;
+          z-index: 2;
+        }
+
+        .quiz-tag {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.7rem;
+          color: var(--green);
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          display: block;
+          margin-bottom: 1rem;
+        }
+
+        .quiz-title {
+          font-size: clamp(2rem, 5vw, 3.5rem);
+          font-weight: 900;
+          background: linear-gradient(135deg, var(--green), var(--cyan), var(--purple));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 0.8rem;
+        }
+
+        .quiz-subtitle {
+          color: var(--text2);
+          font-size: 1rem;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        /* ===== TOOLS BAR ===== */
+        .quiz-tools {
+          display: flex;
+          gap: 0.8rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-bottom: 3rem;
+          position: relative;
+          z-index: 2;
+        }
+
+        .quiz-tool-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: var(--text2);
+          padding: 0.35rem 0.9rem;
+          border-radius: 6px;
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.75rem;
+          transition: all 0.3s;
+        }
+
+        .quiz-tool-badge:hover {
+          border-color: var(--green);
+          color: var(--green);
+          background: rgba(0, 255, 136, 0.05);
+        }
+
+        .quiz-tool-badge .tool-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--green);
+        }
+
+        /* ===== 3D ARENA ===== */
+        .quiz-arena {
+          perspective: 1200px;
+          max-width: 800px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .quiz-progress-bar {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .quiz-progress-track {
+          flex: 1;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.06);
+          border-radius: 2px;
+          overflow: hidden;
+        }
+
+        .quiz-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--green), var(--cyan));
+          border-radius: 2px;
+          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .quiz-progress-label {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.7rem;
+          color: var(--text3);
+          white-space: nowrap;
+        }
+
+        .quiz-score-live {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.75rem;
+          color: var(--green);
+          background: rgba(0, 255, 136, 0.08);
+          border: 1px solid rgba(0, 255, 136, 0.2);
+          padding: 0.2rem 0.7rem;
+          border-radius: 4px;
+        }
+
+        /* ===== 3D CARD ===== */
+        .card-3d-scene {
+          width: 100%;
+          transform-style: preserve-3d;
+          animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+
+          0%,
+          100% {
+            transform: rotateX(0deg) rotateY(0deg);
+          }
+
+          25% {
+            transform: rotateX(1deg) rotateY(-1deg);
+          }
+
+          50% {
+            transform: rotateX(-0.5deg) rotateY(1deg);
+          }
+
+          75% {
+            transform: rotateX(0.5deg) rotateY(-0.5deg);
+          }
+        }
+
+        .quiz-card {
+          background: linear-gradient(145deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+          border: 1px solid rgba(0, 255, 136, 0.15);
+          border-radius: 20px;
+          padding: 2.5rem;
+          position: relative;
+          transform-style: preserve-3d;
+          box-shadow:
+            0 0 0 1px rgba(0, 255, 136, 0.05),
+            0 20px 60px rgba(0, 0, 0, 0.6),
+            0 0 100px rgba(0, 255, 136, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          transition: all 0.4s;
+        }
+
+        .quiz-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.4), var(--cyan), rgba(0, 255, 136, 0.4), transparent);
+          border-radius: 20px 20px 0 0;
+        }
+
+        .quiz-card::after {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          border-radius: 21px;
+          background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), transparent 40%, rgba(0, 212, 255, 0.05));
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.4s;
+        }
+
+        .quiz-card:hover::after {
+          opacity: 1;
+        }
+
+        /* Question Number */
+        .q-num-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: 'Space Mono', monospace;
+          font-size: 0.7rem;
+          color: var(--green);
+          background: rgba(0, 255, 136, 0.06);
+          border: 1px solid rgba(0, 255, 136, 0.15);
+          padding: 0.3rem 0.8rem;
+          border-radius: 20px;
+          margin-bottom: 1.5rem;
+        }
+
+        .q-type-badge {
+          margin-right: 0.5rem;
+          background: rgba(0, 212, 255, 0.1);
+          border: 1px solid rgba(0, 212, 255, 0.2);
+          color: var(--cyan);
+          padding: 0.2rem 0.6rem;
+          border-radius: 4px;
+          font-size: 0.65rem;
+        }
+
+        /* Question Text */
+        .q-text {
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 1.5rem;
+          line-height: 1.6;
+          direction: rtl;
+        }
+
+        /* Code block in question */
+        .q-code {
+          background: #0d1117;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 1.2rem 1.5rem;
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.82rem;
+          line-height: 1.7;
+          color: var(--text2);
+          margin-bottom: 1.5rem;
+          overflow-x: auto;
+          position: relative;
+        }
+
+        .q-code::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 3px;
+          height: 100%;
+          background: linear-gradient(180deg, var(--green), var(--cyan));
+          border-radius: 10px 0 0 10px;
+        }
+
+        .q-code .kw {
+          color: var(--purple);
+        }
+
+        .q-code .fn {
+          color: var(--cyan);
+        }
+
+        .q-code .str {
+          color: var(--orange);
+        }
+
+        .q-code .cm {
+          color: var(--text3);
+          font-style: italic;
+        }
+
+        .q-code .num {
+          color: var(--yellow);
+        }
+
+        .q-code .var {
+          color: var(--green);
+        }
+
+        /* MCQ Options */
+        .q-options {
+          display: grid;
+          gap: 0.8rem;
+        }
+
+        .q-option {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 10px;
+          padding: 0.9rem 1.2rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          font-size: 0.95rem;
+          color: var(--text2);
+          transition: all 0.25s;
+          font-family: 'IBM Plex Mono', monospace;
+          direction: ltr;
+          text-align: left;
+        }
+
+        .q-option:hover {
+          background: rgba(0, 255, 136, 0.05);
+          border-color: rgba(0, 255, 136, 0.3);
+          color: var(--text);
+          transform: translateX(-3px);
+        }
+
+        .q-option .opt-letter {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.75rem;
+          flex-shrink: 0;
+          font-family: 'Space Mono', monospace;
+          color: var(--text3);
+          transition: all 0.25s;
+        }
+
+        .q-option:hover .opt-letter {
+          background: rgba(0, 255, 136, 0.1);
+          border-color: var(--green);
+          color: var(--green);
+        }
+
+        .q-option.selected {
+          background: rgba(0, 212, 255, 0.08);
+          border-color: var(--cyan);
+          color: var(--text);
+        }
+
+        .q-option.selected .opt-letter {
+          background: rgba(0, 212, 255, 0.15);
+          border-color: var(--cyan);
+          color: var(--cyan);
+        }
+
+        .q-option.correct {
+          background: rgba(0, 255, 136, 0.1);
+          border-color: var(--green);
+          color: var(--green);
+          animation: correctPulse 0.5s ease;
+        }
+
+        .q-option.correct .opt-letter {
+          background: rgba(0, 255, 136, 0.2);
+          border-color: var(--green);
+          color: var(--green);
+        }
+
+        .q-option.wrong {
+          background: rgba(239, 68, 68, 0.08);
+          border-color: var(--red);
+          color: var(--red);
+        }
+
+        .q-option.wrong .opt-letter {
+          background: rgba(239, 68, 68, 0.15);
+          border-color: var(--red);
+          color: var(--red);
+        }
+
+        @keyframes correctPulse {
+          0% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.02);
+          }
+
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        /* Code Editor (fill-in-blank) */
+        .code-editor-wrap {
+          margin-bottom: 1.5rem;
+        }
+
+        .editor-topbar {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #161b22;
+          border: 1px solid var(--border);
+          border-bottom: none;
+          border-radius: 10px 10px 0 0;
+          padding: 0.7rem 1rem;
+        }
+
+        .editor-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+
+        .ed-red {
+          background: #ff5f56;
+        }
+
+        .ed-yellow {
+          background: #ffbd2e;
+        }
+
+        .ed-green {
+          background: #27c93f;
+        }
+
+        .editor-file {
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.7rem;
+          color: var(--text3);
+          margin-right: auto;
+        }
+
+        .editor-tools {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .editor-tool-btn {
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          color: var(--text3);
+          padding: 0.2rem 0.6rem;
+          border-radius: 4px;
+          font-size: 0.65rem;
+          cursor: pointer;
+          font-family: 'IBM Plex Mono', monospace;
+          transition: all 0.2s;
+        }
+
+        .editor-tool-btn:hover {
+          border-color: var(--cyan);
+          color: var(--cyan);
+        }
+
+        .code-editor {
+          background: #0a0e14;
+          border: 1px solid var(--border);
+          border-radius: 0 0 10px 10px;
+          padding: 1.2rem 1rem;
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.82rem;
+          line-height: 1.8;
+          color: var(--text);
+          min-height: 120px;
+          width: 100%;
+          resize: vertical;
+          outline: none;
+          transition: border-color 0.3s;
+        }
+
+        .code-editor:focus {
+          border-color: rgba(0, 212, 255, 0.4);
+          box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.05);
+        }
+
+        .code-editor::placeholder {
+          color: var(--text3);
+        }
+
+        /* Feedback line */
+        .q-feedback {
+          display: none;
+          margin-top: 1rem;
+          padding: 0.8rem 1.2rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          animation: feedbackSlide 0.3s ease;
+        }
+
+        @keyframes feedbackSlide {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .q-feedback.correct {
+          background: rgba(0, 255, 136, 0.08);
+          border: 1px solid rgba(0, 255, 136, 0.25);
+          color: var(--green);
+          display: block;
+        }
+
+        .q-feedback.wrong {
+          background: rgba(239, 68, 68, 0.08);
+          border: 1px solid rgba(239, 68, 68, 0.25);
+          color: #f87171;
+          display: block;
+        }
+
+        /* Action buttons */
+        .quiz-actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 2rem;
+          gap: 1rem;
+        }
+
+        .btn-quiz {
+          padding: 0.75rem 1.8rem;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 0.9rem;
+          cursor: pointer;
+          border: none;
+          transition: all 0.3s;
+          font-family: 'Cairo', sans-serif;
+        }
+
+        .btn-quiz-primary {
+          background: linear-gradient(135deg, var(--green), #00c96b);
+          color: #020409;
+          box-shadow: 0 4px 20px rgba(0, 255, 136, 0.25);
+        }
+
+        .btn-quiz-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-quiz-primary:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-quiz-ghost {
+          background: transparent;
+          color: var(--text2);
+          border: 1px solid var(--border);
+        }
+
+        .btn-quiz-ghost:hover {
+          border-color: var(--cyan);
+          color: var(--cyan);
+        }
+
+        .timer-pill {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.85rem;
+          color: var(--yellow);
+          background: rgba(251, 191, 36, 0.08);
+          border: 1px solid rgba(251, 191, 36, 0.2);
+          padding: 0.35rem 1rem;
+          border-radius: 20px;
+        }
+
+        .timer-pill.urgent {
+          color: var(--red);
+          background: rgba(239, 68, 68, 0.08);
+          border-color: rgba(239, 68, 68, 0.2);
+          animation: timerBlink 0.5s ease infinite;
+        }
+
+        @keyframes timerBlink {
+
+          0%,
+          100% {
+            opacity: 1;
+          }
+
+          50% {
+            opacity: 0.4;
+          }
+        }
+
+        /* ===== INTRO SCREEN ===== */
+        .quiz-intro {
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .quiz-intro-icon {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+          display: block;
+          animation: iconBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+
+          0%,
+          100% {
+            transform: translateY(0) rotate(0deg);
+          }
+
+          50% {
+            transform: translateY(-10px) rotate(5deg);
+          }
+        }
+
+        .quiz-intro h2 {
+          font-size: 2rem;
+          font-weight: 900;
+          color: var(--text);
+          margin-bottom: 0.8rem;
+        }
+
+        .quiz-intro p {
+          color: var(--text2);
+          margin-bottom: 2rem;
+          font-size: 1rem;
+          max-width: 400px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .quiz-meta-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .quiz-meta-item {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 12px;
+          padding: 1rem;
+        }
+
+        .quiz-meta-item .meta-val {
+          font-family: 'Space Mono', monospace;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--green);
+          display: block;
+        }
+
+        .quiz-meta-item .meta-lbl {
+          font-size: 0.8rem;
+          color: var(--text3);
+          margin-top: 0.2rem;
+          display: block;
+        }
+
+        /* ===== RESULT SCREEN ===== */
+        .quiz-result {
+          text-align: center;
+          padding: 2rem 1rem;
+          display: none;
+        }
+
+        .result-3d-badge {
+          width: 140px;
+          height: 140px;
+          margin: 0 auto 2rem;
+          position: relative;
+          transform-style: preserve-3d;
+          animation: badgeSpin 8s linear infinite;
+        }
+
+        @keyframes badgeSpin {
+          0% {
+            transform: rotateY(0deg) rotateX(10deg);
+          }
+
+          100% {
+            transform: rotateY(360deg) rotateX(10deg);
+          }
+        }
+
+        .badge-inner {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: conic-gradient(var(--green), var(--cyan), var(--purple), var(--green));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 40px rgba(0, 255, 136, 0.4), inset 0 0 40px rgba(0, 0, 0, 0.3);
+          font-family: 'Space Mono', monospace;
+        }
+
+        .badge-letter {
+          font-size: 3rem;
+          font-weight: 700;
+          color: #020409;
+          text-shadow: none;
+        }
+
+        .result-title {
+          font-size: 1.8rem;
+          font-weight: 900;
+          color: var(--text);
+          margin-bottom: 0.5rem;
+        }
+
+        .result-score-big {
+          font-family: 'Space Mono', monospace;
+          font-size: 3rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, var(--green), var(--cyan));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 0.5rem;
+        }
+
+        .result-desc {
+          color: var(--text2);
+          margin-bottom: 2rem;
+          font-size: 1rem;
+        }
+
+        .result-breakdown {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+          margin-bottom: 2rem;
+          text-align: center;
+        }
+
+        .breakdown-item {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 10px;
+          padding: 1rem;
+        }
+
+        .breakdown-item .bk-val {
+          font-family: 'Space Mono', monospace;
+          font-size: 1.4rem;
+          font-weight: 700;
+          display: block;
+        }
+
+        .breakdown-item .bk-lbl {
+          font-size: 0.75rem;
+          color: var(--text3);
+          margin-top: 0.2rem;
+          display: block;
+        }
+
+        .bk-correct .bk-val {
+          color: var(--green);
+        }
+
+        .bk-wrong .bk-val {
+          color: var(--red);
+        }
+
+        .bk-time .bk-val {
+          color: var(--cyan);
+        }
+
+        .result-grade-bar {
+          height: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 4px;
+          margin-bottom: 2rem;
+          overflow: hidden;
+        }
+
+        .result-grade-fill {
+          height: 100%;
+          border-radius: 4px;
+          transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
+          background: linear-gradient(90deg, var(--red), var(--yellow), var(--green));
+          box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+
+        /* ===== REVIEW SECTION ===== */
+        .result-review {
+          text-align: right;
+          direction: rtl;
+          margin-top: 2rem;
+        }
+
+        .review-title {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.75rem;
+          color: var(--cyan);
+          letter-spacing: 2px;
+          margin-bottom: 1rem;
+          text-transform: uppercase;
+        }
+
+        .review-item {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-right: 3px solid transparent;
+          border-radius: 8px;
+          padding: 0.8rem 1rem;
+          margin-bottom: 0.6rem;
+          font-size: 0.85rem;
+        }
+
+        .review-item.ri-correct {
+          border-right-color: var(--green);
+        }
+
+        .review-item.ri-wrong {
+          border-right-color: var(--red);
+        }
+
+        .ri-q {
+          color: var(--text2);
+          margin-bottom: 0.3rem;
+        }
+
+        .ri-ans {
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.8rem;
+        }
+
+        .ri-correct .ri-ans {
+          color: var(--green);
+        }
+
+        .ri-wrong .ri-ans {
+          color: var(--red);
+        }
+
+        .ri-correct-ans {
+          color: var(--green);
+          font-size: 0.75rem;
+          margin-top: 0.2rem;
+        }
+
+        /* Transitions */
+        .quiz-section {
+          transition: all 0.4s ease;
+        }
+
+        .quiz-section.hidden {
+          display: none;
+        }
+
+        /* ===== Particles ===== */
+        .quiz-particles {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .qp {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: var(--green);
+          border-radius: 50%;
+          animation: qpFloat linear infinite;
+          opacity: 0;
+        }
+
+        @keyframes qpFloat {
+          0% {
+            transform: translateY(100vh) translateX(0);
+            opacity: 0;
+          }
+
+          10% {
+            opacity: 0.6;
+          }
+
+          90% {
+            opacity: 0.3;
+          }
+
+          100% {
+            transform: translateY(-100px) translateX(30px);
+            opacity: 0;
+          }
+        }
+      </style>
+
+      <div class="quiz-grid-bg"></div>
+      <div class="quiz-particles" id="quizParticles"></div>
+
+      <div class="quiz-header">
+        <span class="quiz-tag">// INTERACTIVE CHALLENGE</span>
+        <h2 class="quiz-title">🎮 Node.js Dev Quiz</h2>
+        <p class="quiz-subtitle">اختبر مهاراتك في الـ Backend Development مع أسئلة متعددة المستويات</p>
+      </div>
+
+      <!-- Tools bar -->
+      <div class="quiz-tools">
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> Node.js Runtime</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> Express.js</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> MongoDB</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> TypeScript</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> JWT / Auth</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> REST API</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> Async/Await</div>
+        <div class="quiz-tool-badge"><span class="tool-dot"></span> Code Editor</div>
+      </div>
+
+      <div class="quiz-arena">
+        <!-- INTRO -->
+        <div class="card-3d-scene" id="quizIntroScene">
+          <div class="quiz-card">
+            <div class="quiz-intro">
+              <span class="quiz-intro-icon">⚡</span>
+              <h2>هل أنت مستعد؟</h2>
+              <p>15 سؤال متنوع بين MCQ وكود — تغطي كل مستويات الـ Roadmap</p>
+              <div class="quiz-meta-grid">
+                <div class="quiz-meta-item">
+                  <span class="meta-val">15</span>
+                  <span class="meta-lbl">سؤال</span>
+                </div>
+                <div class="quiz-meta-item">
+                  <span class="meta-val">30s</span>
+                  <span class="meta-lbl">لكل سؤال</span>
+                </div>
+                <div class="quiz-meta-item">
+                  <span class="meta-val">100</span>
+                  <span class="meta-lbl">درجة كاملة</span>
+                </div>
+              </div>
+              <button class="btn-quiz btn-quiz-primary" onclick="startQuiz()"
+                style="font-size:1.1rem; padding:1rem 3rem;">
+                🚀 ابدأ القيز
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUIZ MAIN -->
+        <div id="quizMainScene" class="hidden">
+          <div class="quiz-progress-bar">
+            <span class="quiz-progress-label" id="qProgressLabel">0 / 15</span>
+            <div class="quiz-progress-track">
+              <div class="quiz-progress-fill" id="qProgressFill" style="width:0%"></div>
+            </div>
+            <div class="quiz-score-live" id="qScoreLive">Score: 0</div>
+          </div>
+
+          <div class="card-3d-scene">
+            <div class="quiz-card" id="qCard">
+              <div id="qNumBadge" class="q-num-badge">Q.01 <span class="q-type-badge" id="qTypeBadge">MCQ</span></div>
+              <div id="qText" class="q-text"></div>
+              <div id="qCodeBlock" class="q-code" style="display:none;"></div>
+              <div id="qOptions" class="q-options"></div>
+              <div id="qEditorWrap" class="code-editor-wrap" style="display:none;">
+                <div class="editor-topbar">
+                  <span class="editor-dot ed-red"></span>
+                  <span class="editor-dot ed-yellow"></span>
+                  <span class="editor-dot ed-green"></span>
+                  <span class="editor-file">answer.js</span>
+                  <div class="editor-tools">
+                    <button class="editor-tool-btn" onclick="clearEditor()">⌫ Clear</button>
+                    <button class="editor-tool-btn" onclick="formatHint()">💡 Hint</button>
+                  </div>
+                </div>
+                <textarea class="code-editor" id="qCodeAnswer"
+                  placeholder="// اكتب الكود هنا...&#10;// Write your answer here..."></textarea>
+              </div>
+              <div id="qFeedback" class="q-feedback"></div>
+              <div class="quiz-actions">
+                <div class="timer-pill" id="qTimer">⏱ 30s</div>
+                <button class="btn-quiz btn-quiz-primary" id="qSubmitBtn" onclick="submitAnswer()">تحقق ✓</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="quizResultScene" class="hidden">
+          <div class="card-3d-scene">
+            <div class="quiz-card">
+              <div class="quiz-result" id="quizResult" style="display:block;">
+                <div class="result-3d-badge">
+                  <div class="badge-inner">
+                    <span class="badge-letter" id="resultGradeLetter">A</span>
+                  </div>
+                </div>
+                <div class="result-title" id="resultTitle">ممتاز! 🎉</div>
+                <div class="result-score-big" id="resultScoreBig">0 / 100</div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div class="result-grade-bar">
+                  <div class="result-grade-fill" id="resultGradeFill" style="width:0%"></div>
+                </div>
+                <div class="result-breakdown">
+                  <div class="breakdown-item bk-correct"><span class="bk-val" id="bkCorrect">0</span><span
+                      class="bk-lbl">✓ صح</span></div>
+                  <div class="breakdown-item bk-wrong"><span class="bk-val" id="bkWrong">0</span><span class="bk-lbl">✗
+                      غلط</span></div>
+                  <div class="breakdown-item bk-time"><span class="bk-val" id="bkTime">0s</span><span class="bk-lbl">⏱
+                      الوقت</span></div>
+                </div>
+                <div class="result-review">
+                  <div class="review-title">// مراجعة الإجابات</div>
+                  <div id="reviewList"></div>
+                </div>
+                <div style="margin-top:2rem; display:flex; gap:1rem; justify-content:center;">
+                  <button class="btn-quiz btn-quiz-primary" onclick="restartQuiz()">🔄 مرة تانية</button>
+                  <button class="btn-quiz btn-quiz-ghost" onclick="shareResult()">📤 شير النتيجة</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end quiz-arena -->
+
+    </div><!-- end quiz-wrapper -->
+  </section>
+
+  <!-- Quiz JavaScript -->
+  <script>
+    // ===================== QUESTIONS BANK =====================
+    const QUESTIONS = [
+      {
+        id: 1,
+        type: 'mcq',
+        level: 'L1',
+        text: 'ما هو الناتج الصحيح للكود ده؟',
+        code: `<span class="kw">const</span> <span class="var">promise</span> = <span class="kw">new</span> <span class="fn">Promise</span>((resolve, reject) => {
+  <span class="fn">setTimeout</span>(() => <span class="fn">resolve</span>(<span class="str">'done'</span>), <span class="num">1000</span>);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'start'</span>);
+promise.<span class="fn">then</span>(val => <span class="fn">console</span>.<span class="fn">log</span>(val));
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'end'</span>);`,
+        options: ['start → done → end', 'start → end → done', 'done → start → end', 'start → end'],
+        answer: 1,
+        explanation: 'الـ Promise callback بتتنفذ async، فالكود synchronous بيكمل الأول (start → end)، وبعدين الـ Promise resolve بعد 1s.'
+      },
+      {
+        id: 2,
+        type: 'mcq',
+        level: 'L1',
+        text: 'في Express.js، إيه الفرق بين app.use() و app.get()؟',
+        code: null,
+        options: [
+          'app.use() بتشتغل مع كل الـ HTTP methods، app.get() بس مع GET requests',
+          'app.get() أسرع من app.use()',
+          'app.use() بس للـ Middleware، app.get() للـ Routes بس',
+          'مفيش فرق بينهم'
+        ],
+        answer: 0,
+        explanation: 'app.use() هي middleware handler بتتشغل مع كل الـ HTTP methods. app.get() بتتشغل بس مع GET requests وهي route handler.'
+      },
+      {
+        id: 3,
+        type: 'code',
+        level: 'L1',
+        text: 'أكمل الكود عشان تعمل async function تجيب بيانات من MongoDB باستخدام mongoose:',
+        code: `<span class="kw">const</span> <span class="fn">getUser</span> = <span class="kw">async</span> (id) => {
+  <span class="cm">// أكمل الكود هنا</span>
+  <span class="cm">// استخدم try/catch</span>
+  <span class="cm">// User هو الـ Model</span>
+};`,
+        answer: 'findbyid',
+        keywords: ['try', 'catch', 'await', 'User.findById', 'findById'],
+        explanation: `الإجابة الصحيحة:\ntry {\n  const user = await User.findById(id);\n  return user;\n} catch(err) {\n  throw err;\n}`
+      },
+      {
+        id: 4,
+        type: 'mcq',
+        level: 'L2',
+        text: 'في JWT Authentication، فين المكان الأمن لتخزين الـ JWT token في الـ Frontend؟',
+        code: null,
+        options: [
+          'localStorage — سهل الوصول إليه',
+          'sessionStorage — بيتمسح لما تقفل التبويب',
+          'HttpOnly Cookie — محمي من XSS attacks',
+          'في URL Params — عشان يبقى في الـ History'
+        ],
+        answer: 2,
+        explanation: 'HttpOnly Cookie هو الأأمن لأنه غير accessible بـ JavaScript مما يحميه من XSS attacks. localStorage و sessionStorage معرضين لـ XSS.'
+      },
+      {
+        id: 5,
+        type: 'mcq',
+        level: 'L2',
+        text: 'ما هو الـ HTTP Status Code الصحيح لكل حالة؟',
+        code: `<span class="cm">// Match the status code to the situation:</span>
+<span class="cm">// A) Resource created successfully</span>
+<span class="cm">// B) Not authorized (no token)</span>
+<span class="cm">// C) Forbidden (token valid, no permission)</span>
+<span class="cm">// D) Resource not found</span>`,
+        options: [
+          'A=201, B=401, C=403, D=404',
+          'A=200, B=403, C=401, D=404',
+          'A=201, B=403, C=401, D=500',
+          'A=200, B=401, C=403, D=400'
+        ],
+        answer: 0,
+        explanation: '201=Created، 401=Unauthorized (لازم تعمل login)، 403=Forbidden (مسموحلكش حتى لو logged in)، 404=Not Found.'
+      },
+      {
+        id: 6,
+        type: 'code',
+        level: 'L2',
+        text: 'اكتب Express middleware بيتحقق من الـ JWT token ويضيف الـ user object للـ req:',
+        code: `<span class="kw">const</span> <span class="fn">authMiddleware</span> = (req, res, next) => {
+  <span class="cm">// اكتب الكود هنا</span>
+  <span class="cm">// استخدم jwt.verify()</span>
+  <span class="cm">// token بيجي من: req.headers.authorization</span>
+};`,
+        answer: 'jwt.verify',
+        keywords: ['jwt.verify', 'jwt', 'verify', 'authorization', 'next()', 'next('],
+        explanation: `const token = req.headers.authorization?.split(' ')[1];\nif(!token) return res.status(401).json({error:'No token'});\ntry {\n  req.user = jwt.verify(token, process.env.JWT_SECRET);\n  next();\n} catch(e) {\n  res.status(401).json({error:'Invalid token'});\n}`
+      },
+      {
+        id: 7,
+        type: 'mcq',
+        level: 'L1',
+        text: 'إيه هو الناتج الصحيح للكود ده في Node.js؟',
+        code: `<span class="fn">console</span>.<span class="fn">log</span>(<span class="num">1</span>);
+<span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="num">2</span>), <span class="num">0</span>);
+<span class="kw">new</span> <span class="fn">Promise</span>(res => res(<span class="num">3</span>)).<span class="fn">then</span>(<span class="fn">console</span>.<span class="fn">log</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="num">4</span>);`,
+        options: ['1 2 3 4', '1 4 3 2', '1 4 2 3', '1 3 4 2'],
+        answer: 1,
+        explanation: 'الـ Event Loop: أول synchronous code (1,4)، بعدين microtasks وهي Promises (3)، وأخيراً macrotasks وهي setTimeout (2). فالناتج: 1 → 4 → 3 → 2'
+      },
+      {
+        id: 8,
+        type: 'mcq',
+        level: 'L2',
+        text: 'في TypeScript، إيه الفرق بين interface و type؟',
+        code: `<span class="kw">interface</span> <span class="var">IUser</span> { name: <span class="kw">string</span>; age: <span class="kw">number</span>; }
+<span class="kw">type</span> <span class="var">TUser</span> = { name: <span class="kw">string</span>; age: <span class="kw">number</span>; };`,
+        options: [
+          'مفيش فرق خالص، نفس الحاجة تماماً',
+          'interface ممكن تتوسع (extends/merge)، type أمكانياته أوسع في Union/Intersection',
+          'type أسرع من interface في الـ Compilation',
+          'interface بس للـ Objects، type لأي حاجة'
+        ],
+        answer: 1,
+        explanation: 'interface بتدعم Declaration Merging وبتتوسع بـ extends. type أقوى في الـ Union types (A | B) والـ Intersection types (A & B) والـ Mapped types.'
+      },
+      {
+        id: 9,
+        type: 'mcq',
+        level: 'L3',
+        text: 'في MongoDB، متى تستخدم $lookup بدل الـ populate في Mongoose؟',
+        code: null,
+        options: [
+          'لما تحتاج تعمل aggregation pipeline مع joins معقدة ومتعددة',
+          'populate دايماً أحسن من $lookup',
+          '$lookup بس في SQL مش MongoDB',
+          'لما الـ documents صغيرة وعددها قليل'
+        ],
+        answer: 0,
+        explanation: '$lookup بتستخدمه في الـ Aggregation Pipeline لما تحتاج joins معقدة أو filtering على الـ joined data. populate أسهل للـ simple relationships.'
+      },
+      {
+        id: 10,
+        type: 'code',
+        level: 'L3',
+        text: 'اكتب Mongoose aggregation query بتجيب الـ users اللي عندهم أكتر من 5 orders ومرتبين بالـ count descending:',
+        code: `<span class="kw">const</span> <span class="var">result</span> = <span class="kw">await</span> Order.<span class="fn">aggregate</span>([
+  <span class="cm">// اكتب الـ pipeline stages هنا</span>
+  <span class="cm">// Stage 1: group by userId وعد الـ orders</span>
+  <span class="cm">// Stage 2: filter من له أكتر من 5</span>
+  <span class="cm">// Stage 3: ترتيب تنازلي</span>
+]);`,
+        answer: 'group',
+        keywords: ['$group', '$match', '$sort', 'count', '_id'],
+        explanation: `{ $group: { _id: "$userId", count: { $sum: 1 } } },\n{ $match: { count: { $gt: 5 } } },\n{ $sort: { count: -1 } }`
+      },
+      {
+        id: 11,
+        type: 'mcq',
+        level: 'L3',
+        text: 'في Socket.io، إيه الفرق بين io.emit() و socket.emit() و io.to(room).emit()؟',
+        code: null,
+        options: [
+          'كلهم نفس الحاجة بس syntax مختلف',
+          'io.emit=كل الـ clients، socket.emit=نفس الـ client، io.to(room).emit=الـ room بس',
+          'socket.emit=كل الـ clients، io.emit=الـ server بس',
+          'io.to(room).emit بطيء أكتر من io.emit'
+        ],
+        answer: 1,
+        explanation: 'io.emit() بتبعت لكل الـ connected clients. socket.emit() بتبعت للـ client الواحد. io.to(room).emit() بتبعت لكل clients في room معينة.'
+      },
+      {
+        id: 12,
+        type: 'mcq',
+        level: 'L3',
+        text: 'Redis — متى تستخدم Redis كـ Cache وإيه الـ cache invalidation strategy الأنسب للـ user sessions؟',
+        code: null,
+        options: [
+          'دايماً cache كل حاجة، Redis سريع',
+          'استخدم TTL مناسب للـ sessions + invalidate عند logout أو password change',
+          'Redis بس للـ rate limiting مش للـ sessions',
+          'الـ in-memory cache في Node.js أحسن من Redis'
+        ],
+        answer: 1,
+        explanation: 'أفضل strategy: ضع TTL معقول للـ session في Redis + امسح الـ cache explicitly لما اليوزر يعمل logout أو يغير الـ password. ده بيوازن بين الـ performance والـ security.'
+      },
+      {
+        id: 13,
+        type: 'code',
+        level: 'L2',
+        text: 'اكتب Express error handling middleware صح مع TypeScript types:',
+        code: `<span class="cm">// Error handling middleware في Express</span>
+<span class="cm">// لازم يكون عنده 4 parameters</span>
+<span class="kw">const</span> <span class="var">errorHandler</span> = <span class="cm">/* أكمل هنا */</span>`,
+        answer: 'err, req, res, next',
+        keywords: ['err', 'req', 'res', 'next', '4', 'status', 'json'],
+        explanation: `const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {\n  const status = err.status || 500;\n  res.status(status).json({\n    error: err.message || 'Internal Server Error'\n  });\n};\n// لازم يكون 4 params عشان Express يتعرف عليه كـ error handler`
+      },
+      {
+        id: 14,
+        type: 'mcq',
+        level: 'L4',
+        text: 'في الـ System Design، إيه الفرق بين Horizontal Scaling و Vertical Scaling ومتى تستخدم كل واحد؟',
+        code: null,
+        options: [
+          'مفيش فرق، الاتنين بيزودوا الـ capacity',
+          'Vertical: ترقية الـ server الواحد (أقوى CPU/RAM)، Horizontal: زيادة servers. Vertical أسهل، Horizontal أسكيلابل أكتر',
+          'Horizontal أرخص دايماً من Vertical',
+          'Vertical بس في الـ Cloud، Horizontal بس On-premise'
+        ],
+        answer: 1,
+        explanation: 'Vertical Scaling (Scale Up): ترقي نفس الـ server. أسهل بس فيه حد أقصى. Horizontal Scaling (Scale Out): بتضيف servers. أعقد بس practically unlimited ومتاح للـ distributed systems.'
+      },
+      {
+        id: 15,
+        type: 'mcq',
+        level: 'L4',
+        text: 'في الـ Design Patterns، أنهي Pattern هتستخدم عشان تعمل نظام notifications بيدعم email, SMS, push notification بدون ما تغير الـ core code لما بتضيف channel جديد؟',
+        code: `<span class="cm">// مثال على المشكلة:</span>
+<span class="kw">class</span> <span class="var">NotificationService</span> {
+  <span class="fn">send</span>(type, msg) {
+    <span class="kw">if</span>(type === <span class="str">'email'</span>) { <span class="cm">/* ... */</span> }
+    <span class="kw">if</span>(type === <span class="str">'sms'</span>) { <span class="cm">/* ... */</span> }
+    <span class="cm">// كل ما بتضيف channel بتعدل الكلاس!</span>
+  }
+}`,
+        options: [
+          'Singleton Pattern — عشان تضمن instance واحد',
+          'Strategy Pattern — تعرف interface مشترك وكل channel بيعمل implementation',
+          'Observer Pattern — عشان تـ subscribe للـ events',
+          'Factory Pattern — عشان تنشئ objects'
+        ],
+        answer: 1,
+        explanation: 'Strategy Pattern هو الأنسب. تعمل NotificationStrategy interface وكل channel (Email, SMS, Push) بيعمل implementation. بكده تضيف channels جديدة من غير ما تلمس الـ core code. ده بيطبق Open/Closed Principle.'
+      }
+    ];
+
+    // ===================== QUIZ STATE =====================
+    let currentQ = 0;
+    let score = 0;
+    let answers = [];
+    let timer = null;
+    let timeLeft = 30;
+    let totalTime = 0;
+    let totalTimer = null;
+    let quizStarted = false;
+
+    // ===================== PARTICLES =====================
+    (function spawnParticles() {
+      const container = document.getElementById('quizParticles');
+      if (!container) return;
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'qp';
+        p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      animation-duration: ${8 + Math.random() * 12}s;
+      animation-delay: ${Math.random() * 10}s;
+      opacity: 0;
+      background: ${Math.random() > 0.5 ? 'var(--green)' : 'var(--cyan)'};
+    `;
+        container.appendChild(p);
+      }
+    })();
+
+    // ===================== START =====================
+    function startQuiz() {
+      currentQ = 0;
+      score = 0;
+      answers = [];
+      totalTime = 0;
+      quizStarted = true;
+
+      document.getElementById('quizIntroScene').classList.add('hidden');
+      document.getElementById('quizMainScene').classList.remove('hidden');
+
+      totalTimer = setInterval(() => totalTime++, 1000);
+      renderQuestion();
+    }
+
+    // ===================== RENDER QUESTION =====================
+    function renderQuestion() {
+      const q = QUESTIONS[currentQ];
+      const card = document.getElementById('qCard');
+
+      // Flip animation
+      card.style.transform = 'rotateY(90deg) scale(0.95)';
+      setTimeout(() => {
+        card.style.transform = 'rotateY(0deg) scale(1)';
+      }, 250);
+      card.style.transition = 'transform 0.25s ease';
+
+      // Update badge
+      document.getElementById('qNumBadge').innerHTML = `Q.${String(currentQ + 1).padStart(2, '0')} <span class="q-type-badge" id="qTypeBadge">${q.type === 'code' ? '💻 CODE' : '🔘 MCQ'}</span>`;
+      document.getElementById('qText').textContent = q.text;
+
+      // Code block
+      const codeBlock = document.getElementById('qCodeBlock');
+      if (q.code) {
+        codeBlock.innerHTML = q.code;
+        codeBlock.style.display = 'block';
+      } else {
+        codeBlock.style.display = 'none';
+      }
+
+      // Options / Editor
+      const opts = document.getElementById('qOptions');
+      const editor = document.getElementById('qEditorWrap');
+      const feedback = document.getElementById('qFeedback');
+      const submitBtn = document.getElementById('qSubmitBtn');
+
+      feedback.className = 'q-feedback';
+      feedback.textContent = '';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'تحقق ✓';
+
+      if (q.type === 'mcq') {
+        editor.style.display = 'none';
+        opts.style.display = 'grid';
+        opts.innerHTML = q.options.map((opt, i) => `
+      <div class="q-option" id="opt-${i}" onclick="selectOption(${i})">
+        <span class="opt-letter">${['A', 'B', 'C', 'D'][i]}</span>
+        <span>${opt}</span>
+      </div>
+    `).join('');
+      } else {
+        opts.style.display = 'none';
+        editor.style.display = 'block';
+        document.getElementById('qCodeAnswer').value = '';
+      }
+
+      // Progress
+      document.getElementById('qProgressLabel').textContent = `${currentQ + 1} / ${QUESTIONS.length}`;
+      document.getElementById('qProgressFill').style.width = `${((currentQ + 1) / QUESTIONS.length) * 100}%`;
+      document.getElementById('qScoreLive').textContent = `Score: ${score}`;
+
+      // Timer
+      startTimer();
+    }
+
+    // ===================== TIMER =====================
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 30;
+      updateTimerUI();
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          autoSubmit();
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const el = document.getElementById('qTimer');
+      el.textContent = `⏱ ${timeLeft}s`;
+      el.className = timeLeft <= 8 ? 'timer-pill urgent' : 'timer-pill';
+    }
+
+    function autoSubmit() {
+      const q = QUESTIONS[currentQ];
+      answers.push({ q: currentQ, correct: false, userAnswer: '(timeout)', correctAnswer: q.type === 'mcq' ? q.options[q.answer] : q.explanation });
+      showFeedback(false, '⏰ انتهى الوقت! ' + q.explanation);
+      lockQuestion();
+      setTimeout(nextQuestion, 2500);
+    }
+
+    // ===================== SELECT OPTION =====================
+    let selectedOption = -1;
+
+    function selectOption(i) {
+      if (document.getElementById('qSubmitBtn').disabled) return;
+      selectedOption = i;
+      document.querySelectorAll('.q-option').forEach((el, idx) => {
+        el.classList.toggle('selected', idx === i);
+      });
+    }
+
+    // ===================== SUBMIT =====================
+    function submitAnswer() {
+      clearInterval(timer);
+      const q = QUESTIONS[currentQ];
+
+      if (q.type === 'mcq') {
+        if (selectedOption === -1) {
+          document.getElementById('qFeedback').className = 'q-feedback wrong';
+          document.getElementById('qFeedback').textContent = '⚠️ اختار إجابة الأول!';
+          document.getElementById('qFeedback').style.display = 'block';
+          startTimer();
+          return;
+        }
+        const isCorrect = selectedOption === q.answer;
+        if (isCorrect) {
+          score += Math.ceil((timeLeft / 30) * 6.67);
+          document.getElementById('opt-' + selectedOption).classList.add('correct');
+        } else {
+          document.getElementById('opt-' + selectedOption).classList.add('wrong');
+          document.getElementById('opt-' + q.answer).classList.add('correct');
+        }
+        answers.push({
+          q: currentQ,
+          correct: isCorrect,
+          userAnswer: q.options[selectedOption],
+          correctAnswer: q.options[q.answer]
+        });
+        showFeedback(isCorrect, (isCorrect ? '✅ ' : '❌ ') + q.explanation);
+        selectedOption = -1;
+      } else {
+        const userCode = document.getElementById('qCodeAnswer').value.trim().toLowerCase();
+        const isCorrect = q.keywords.some(kw => userCode.includes(kw.toLowerCase()));
+        if (isCorrect) score += Math.ceil((timeLeft / 30) * 6.67);
+        answers.push({
+          q: currentQ,
+          correct: isCorrect,
+          userAnswer: userCode.slice(0, 60) + (userCode.length > 60 ? '...' : ''),
+          correctAnswer: q.explanation
+        });
+        showFeedback(isCorrect, (isCorrect ? '✅ كويس! ' : '❌ ') + q.explanation);
+      }
+
+      document.getElementById('qScoreLive').textContent = `Score: ${score}`;
+      lockQuestion();
+      setTimeout(nextQuestion, 3000);
+    }
+
+    function lockQuestion() {
+      document.getElementById('qSubmitBtn').disabled = true;
+      document.getElementById('qSubmitBtn').textContent = 'التالي...';
+      document.querySelectorAll('.q-option').forEach(el => el.style.pointerEvents = 'none');
+    }
+
+    function showFeedback(correct, text) {
+      const el = document.getElementById('qFeedback');
+      el.className = 'q-feedback ' + (correct ? 'correct' : 'wrong');
+      el.textContent = text;
+    }
+
+    // ===================== NEXT =====================
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ >= QUESTIONS.length) {
+        showResult();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    // ===================== RESULT =====================
+    function showResult() {
+      clearInterval(totalTimer);
+      clearInterval(timer);
+
+      document.getElementById('quizMainScene').classList.add('hidden');
+      document.getElementById('quizResultScene').classList.remove('hidden');
+
+      const total = QUESTIONS.length;
+      const correct = answers.filter(a => a.correct).length;
+      const wrong = total - correct;
+      const pct = Math.round((score / 100) * 100);
+      const finalScore = Math.min(score, 100);
+
+      // Grade
+      let grade, title, desc;
+      if (finalScore >= 90) { grade = 'A+'; title = '🏆 أسطورة!'; desc = 'أداء استثنائي — أنت مستعد للـ Senior Level!'; }
+      else if (finalScore >= 80) { grade = 'A'; title = '🎉 ممتاز!'; desc = 'مستوى عالي جداً — Junior+ بجدارة!'; }
+      else if (finalScore >= 70) { grade = 'B+'; title = '👏 كويس جداً!'; desc = 'أداء قوي — كمل على النهج ده!'; }
+      else if (finalScore >= 60) { grade = 'B'; title = '👍 كويس!'; desc = 'تمام بس في حاجات تحتاج مراجعة.'; }
+      else if (finalScore >= 50) { grade = 'C'; title = '📚 مقبول'; desc = 'محتاج مذاكرة أكتر في بعض الـ Topics.'; }
+      else { grade = 'D'; title = '💪 حاول تاني!'; desc = 'ارجع للـ Roadmap واذاكر كويس وارجع!'; }
+
+      document.getElementById('resultGradeLetter').textContent = grade;
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultScoreBig').textContent = `${finalScore} / 100`;
+      document.getElementById('resultDesc').textContent = desc;
+      document.getElementById('bkCorrect').textContent = correct;
+      document.getElementById('bkWrong').textContent = wrong;
+      document.getElementById('bkTime').textContent = `${totalTime}s`;
+
+      setTimeout(() => {
+        document.getElementById('resultGradeFill').style.width = `${finalScore}%`;
+      }, 100);
+
+      // Badge color
+      const colors = { 'A+': '#fbbf24', 'A': '#00ff88', 'B+': '#00d4ff', 'B': '#a855f7', 'C': '#f97316', 'D': '#ef4444' };
+      document.querySelector('.badge-inner').style.background = `conic-gradient(${colors[grade] || '#00ff88'}, #030712, ${colors[grade] || '#00ff88'})`;
+
+      // Review
+      const reviewList = document.getElementById('reviewList');
+      reviewList.innerHTML = answers.map((a, i) => {
+        const q = QUESTIONS[a.q];
+        return `<div class="review-item ${a.correct ? 'ri-correct' : 'ri-wrong'}">
+      <div class="ri-q">Q${i + 1}: ${q.text.substring(0, 70)}${q.text.length > 70 ? '...' : ''}</div>
+      <div class="ri-ans">${a.correct ? '✓' : '✗'} ${a.userAnswer || '(no answer)'}</div>
+      ${!a.correct ? `<div class="ri-correct-ans">💡 ${a.correctAnswer.substring(0, 100)}...</div>` : ''}
+    </div>`;
+      }).join('');
+    }
+
+    // ===================== HELPERS =====================
+    function clearEditor() { document.getElementById('qCodeAnswer').value = ''; }
+
+    function formatHint() {
+      const q = QUESTIONS[currentQ];
+      if (q.keywords) {
+        document.getElementById('qFeedback').className = 'q-feedback correct';
+        document.getElementById('qFeedback').textContent = `💡 Hint: استخدم ${q.keywords.slice(0, 2).join(' و ')}`;
+      }
+    }
+
+    function restartQuiz() {
+      document.getElementById('quizResultScene').classList.add('hidden');
+      document.getElementById('quizIntroScene').classList.remove('hidden');
+      currentQ = 0; score = 0; answers = []; totalTime = 0;
+    }
+
+    function shareResult() {
+      const finalScore = Math.min(score, 100);
+      const text = `🎮 Node.js Quiz by Walid Ebaid\n⭐ Score: ${finalScore}/100\n🚀 Try it yourself!`;
+      if (navigator.share) {
+        navigator.share({ title: 'Node.js Quiz Result', text });
+      } else {
+        navigator.clipboard?.writeText(text).then(() => alert('تم النسخ! ✓'));
+      }
+    }
+  </script>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">NODE.JS ROADMAP</div>
+    <p class="footer-text">
+      صُمِّم وطُوِّر بالكامل بواسطة
+      <a href="https://github.com/WalidEbaid11" target="_blank" style="color:var(--green)">Walid Ebaid</a>
+    </p>
+    <p class="footer-text" style="margin-top:0.5rem; color:var(--text3);">
+      ⭐ Star on GitHub · 🚀 Happy Coding
+    </p>
+  </footer>
+
+  <script>
+    // Toggle Weeks
+    function toggleWeek(header) {
+      const item = header.closest('.week-item');
+      item.classList.toggle('open');
+    }
+
+    // Scroll Reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.08 });
+
+    reveals.forEach(el => observer.observe(el));
+
+    // Animated counters
+    function animateCounter(el, target, duration) {
+      let start = 0;
+      const increment = target / (duration / 16);
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= target) {
+          start = target;
+          clearInterval(timer);
+        }
+        el.textContent = Math.floor(start) + (el.dataset.suffix || '');
+      }, 16);
+    }
+
+    // Nav active
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section[id]');
+      const links = document.querySelectorAll('.nav-links a');
+      let current = '';
+
+      sections.forEach(section => {
+        const top = section.offsetTop - 100;
+        if (scrollY >= top) current = section.getAttribute('id');
+      });
+
+      links.forEach(link => {
+        link.style.color = link.getAttribute('href') === `#${current}` ? 'var(--green)' : '';
+      });
+    });
+  </script>
+</body>
+
+</html>
